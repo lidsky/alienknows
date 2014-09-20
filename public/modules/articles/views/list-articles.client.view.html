@@ -1,19 +1,102 @@
-<section data-ng-controller="ArticlesController" data-ng-init="find()">
+<section data-ng-controller="ArticlesController" data-ng-init="loadMore()">
 	<div class="page-header">
 		<h1>Articles</h1>
 	</div>
-	<div class="list-group">
-		<a data-ng-repeat="article in articles" data-ng-href="#!/articles/{{article._id}}" class="list-group-item">
-			<small class="list-group-item-text">
-				Posted on
-				<span data-ng-bind="article.created | date:'mediumDate'"></span>
-				by
-				<span data-ng-bind="article.user.displayName"></span>
-			</small>
-			<h4 class="list-group-item-heading" data-ng-bind="article.title"></h4>
-			<p class="list-group-item-text" data-ng-bind="article.content"></p>
-		</a>
+
+	<div class="row">
+
+		<div class="col-md-4"></div>
+
+		<div class="col-md-4 list-group" infinite-scroll='loadMore()' infinite-scroll-distance='1'>
+			<!-- <a data-ng-repeat="article in articles" data-ng-href="#!/articles/{{article._id}}" class="list-group-item"> -->
+			<div data-ng-repeat="article in articleList track by $index"
+			     class="list-group-item preview-block"
+			     data-ng-init="article.showSummary = false; article.showVideo = false">
+
+		<!-- 		<small class="list-group-item-text">
+					Posted on
+					<span data-ng-bind="article.created | date:'mediumDate'"></span>
+					by
+					<span data-ng-bind="article.user.displayName"></span>
+				</small> -->
+
+
+
+				<div class="preview-title-container">
+					<a href="{{article.url}}" 
+					   target="_blank" 
+					   data-ng-class="{'preview-title-more': article.showSummary, 'preview-title-less': !article.showSummary}">
+						<span class="list-group-item-heading preview-title"
+							  data-ng-class="{'preview-title-more': article.showSummary, 'preview-title-less': !article.showSummary}"
+							  data-ng-bind="article.title"
+							  data-easy-preview
+							  data-more="article.showSummary">
+						</span>
+					</a>
+				</div>
+
+				<div class="preview-picture" 
+					 data-ng-if="!article.video_preview && !!article.picture_preview">
+					<a data-ng-href="{{article.url}}" 
+					   target="_blank" 
+					   data-ng-class="{'show-less': !article.showVideo}"
+					   data-easy-preview
+					   data-more="article.showVideo">
+						<img data-ng-src="{{article.picture_preview}}"/>
+					</a>
+					
+				</div>
+
+				<div data-ng-if="!!article.video_preview" class="preview-video">
+			<!-- 		http://beerpla.net/2010/01/12/are-your-youtube-video-embeds-missing-the-full-screen-button-here-is-how-to-fix-it/
+					http://stackoverflow.com/questions/14903112/angularjs-expression-in-html-object-tag -->
+					<!-- or just use iframe..?? -->
+					<object data-ng-attr-data="{{article.video_preview}}">
+					</object>
+
+				</div>
+
+				<!-- TODO: sanitize input ref: https://docs.angularjs.org/api/ng/service/$sce -->
+				<div class="preview-text"
+					 data-ng-class="{'show-less': !article.showSummary, 'show-more': article.showSummary}"
+					 data-ng-bind="article.description_preview" 
+					 data-ng-show="(!article.summary_preview && !article.self_post_preview) || !article.showSummary"
+					 data-easy-preview
+					 data-more="article.showSummary">
+				</div>
+				<div class="preview-text" 
+					 data-ng-bind="article.summary_preview" 
+					 data-ng-show="!!article.summary_preview && article.showSummary">
+				</div>
+				<div class="preview-text" 
+					 data-ng-bind-html="article.self_post_preview" 
+					 data-ng-show="!!article.self_post_preview && article.showSummary">
+				</div>
+
+
+				<div class="preview-value-container" data-ng-show="article.value">
+					<span class="preview-more-text-font">
+						<span class="social-currency">zł </span> 
+						{{article.value}}
+					</span>
+				</div>
+
+
+				<div class="comment-number-container">
+					<a data-ng-href="{{article.comment_url}}" target="_blank">
+						<span class="glyphicon glyphicon-comment"></span>
+						<span class="comment-number">{{article.comment_number}}</span>
+					</a>
+
+				</div> 
+
+			</div>
+		</div>
+
+		<div class="col-md-4"></div>
+
 	</div>
+
 	<div class="alert alert-warning text-center" data-ng-if="articles.$resolved && !articles.length">
 		No articles yet, why don't you <a href="/#!/articles/create">create one</a>?
 	</div>

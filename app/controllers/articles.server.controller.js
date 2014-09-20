@@ -73,15 +73,41 @@ exports.delete = function(req, res) {
  * List of Articles
  */
 exports.list = function(req, res) {
-	Article.find().sort('-created').populate('user', 'displayName').exec(function(err, articles) {
-		if (err) {
-			return res.status(400).send({
-				message: errorHandler.getErrorMessage(err)
+	console.log('here babi in article list');
+	console.log('query....: ');
+	console.log(req.query);
+
+	if (req.query.currentUtc) {
+		Article.find({saved_utc: {$lt: parseInt(req.query.currentUtc)}})
+			.limit(25)
+			.sort('-saved_utc')
+			.exec(function(err, articles) {
+				if (err) {
+					return res.status(400).send({
+						message: errorHandler.getErrorMessage(err)
+					});					
+				} else {
+					// console.log('here in exec');
+					// console.log(articles);
+					res.jsonp(articles);
+				}
 			});
-		} else {
-			res.jsonp(articles);
-		}
-	});
+	} else {
+
+
+		Article.find().sort('-created').populate('user', 'displayName').exec(function(err, articles) {
+			if (err) {
+				return res.status(400).send({
+					message: errorHandler.getErrorMessage(err)
+				});
+			} else {
+				res.jsonp(articles);
+			}
+		});
+
+	}
+
+
 };
 
 /**

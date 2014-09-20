@@ -3,6 +3,15 @@
 angular.module('articles').controller('ArticlesController', ['$scope', '$stateParams', '$location', 'Authentication', 'Articles',
 	function($scope, $stateParams, $location, Authentication, Articles) {
 		$scope.authentication = Authentication;
+		$scope.articleList = [];
+
+
+
+		var getCurrentUTC = function() {
+			var curTime = (new Date()).getTime();
+			return Math.round(curTime/1000);
+		};
+		$scope.lastArticleUTC = getCurrentUTC();
 
 		$scope.create = function() {
 			var article = new Articles({
@@ -54,5 +63,26 @@ angular.module('articles').controller('ArticlesController', ['$scope', '$statePa
 				articleId: $stateParams.articleId
 			});
 		};
+
+		$scope.loadMore = function() {
+			Articles.query({currentUtc: $scope.lastArticleUTC}, function(articles) {
+				angular.forEach(articles, function(article, index) {
+					if ($scope.articleList.indexOf(article) === -1) {
+						$scope.articleList.push(article);
+					} else {
+						console.log('DUPLICATE!: ');
+						console.log(article);
+					}
+				
+				});
+
+				$scope.lastArticleUTC = articles[articles.length - 1].saved_utc;
+
+			});
+
+		};
+
+
+
 	}
 ]);
