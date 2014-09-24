@@ -4,6 +4,7 @@ angular.module('articles').controller('ArticlesController', ['$scope', '$statePa
 	function($scope, $stateParams, $location, Authentication, Articles) {
 		$scope.authentication = Authentication;
 		$scope.articleList = [];
+		$scope.isBusy = false;
 
 
 
@@ -65,20 +66,26 @@ angular.module('articles').controller('ArticlesController', ['$scope', '$statePa
 		};
 
 		$scope.loadMore = function() {
-			Articles.query({currentUtc: $scope.lastArticleUTC}, function(articles) {
-				angular.forEach(articles, function(article, index) {
-					if ($scope.articleList.indexOf(article) === -1) {
-						$scope.articleList.push(article);
-					} else {
-						console.log('DUPLICATE!: ');
-						console.log(article);
-					}
-				
+			console.log('here in loadMore');
+			if (!$scope.isBusy) {
+				$scope.isBusy = true;
+				Articles.query({currentUtc: $scope.lastArticleUTC}, function(articles) {
+					console.log('here in articles query');
+					angular.forEach(articles, function(article, index) {
+						if ($scope.articleList.indexOf(article) === -1) {
+							$scope.articleList.push(article);
+						} else {
+							console.log('DUPLICATE!: ');
+							console.log(article);
+						}
+					
+					});
+
+					$scope.lastArticleUTC = articles[articles.length - 1].saved_utc;
+					$scope.isBusy = false;
+
 				});
-
-				$scope.lastArticleUTC = articles[articles.length - 1].saved_utc;
-
-			});
+			}
 
 		};
 

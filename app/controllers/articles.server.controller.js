@@ -77,9 +77,15 @@ exports.list = function(req, res) {
 	console.log('query....: ');
 	console.log(req.query);
 
+	if (!req.session.articles) {
+		req.session.articles = [];
+	}
+	// console.log('after session');
+	// console.log(req.session.articles);
+
 	if (req.query.currentUtc) {
-		Article.find({saved_utc: {$lt: parseInt(req.query.currentUtc)}})
-			.limit(25)
+		Article.find({   $and: [{_id: {$nin: req.session.articles }}, {saved_utc: {$lt: parseInt(req.query.currentUtc)}}] })
+		// Article.find({   $and: [{saved_utc: {$lt: parseInt(req.query.currentUtc)}}] })
 			.sort('-saved_utc')
 			.exec(function(err, articles) {
 				if (err) {
@@ -87,9 +93,18 @@ exports.list = function(req, res) {
 						message: errorHandler.getErrorMessage(err)
 					});					
 				} else {
-					// console.log('here in exec');
-					// console.log(articles);
-					res.jsonp(articles);
+					var minArticleNumber = Math.min(articles.length, 25);
+					var newArticles = articles.slice(0,minArticleNumber);
+					console.log('number of the OLD req.session.articles: ');
+					console.log(req.session.articles.length);
+					req.session.articles = req.session.articles.concat(_.map(newArticles, function(article) { return article._id; }));
+					console.log('number of the NEW req.session.articles: ');
+					console.log(req.session.articles.length);
+
+					console.log('=========================================\n number of newArticles:');
+					console.log(newArticles.length);
+
+					res.jsonp(newArticles);
 				}
 			});
 	} else {

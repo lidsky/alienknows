@@ -34,11 +34,10 @@ comments-preview
 content-page (full preview and comments)
 
 '''
-# REQUEST_HEADER = { 'User-Agent': 'alienknows.com summerizer' }
-REQUEST_HEADER = { 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)' }
+REQUEST_HEADER = { 'User-Agent': 'alienknows.com summerizer' }
 REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1808@gmail.com)'
 USERNAME = 'plz_hire_me_reddit'
-PASSWORD = 'alienknows89'
+PASSWORD = '****'
 
 def database_connect():
     client = MongoClient('mongodb://localhost/alienknows-dev')
@@ -48,6 +47,12 @@ def database_connect():
 def article_collection():
     db = database_connect()
     return db.articles
+
+
+def article_from_db(article_id):
+    article = article_collection()
+    return article.find_one({'submission_id': article_id})
+
 
 def website_collection():
     """
@@ -61,6 +66,31 @@ def website_collection():
     """
     db = database_connect()
     return db.websites
+
+
+def insert_website_data(collection_obj, website_url, title, description):
+    new_website = {'website': website_url, 'title': title, 'description': description}
+    print '\nSaving website data: '
+    pprint(new_website)
+    website_id = collection_obj.insert(new_website)
+    print 'Saved website data with id: ', website_id , '\n'
+    return
+
+
+def query_website_data(website_url):
+    websites = website_collection()
+    website_data = websites.find_one({'website':website_url})
+    if website_data:
+        print '\ndebugging, website data: '
+        pprint(website_data)
+        print '\n'
+        return website_data['title'], website_data['description']
+    else:
+        soup = soupify_page(url=website_url)
+        title = get_metadata_title(soup)
+        description = get_metadata_description(soup)
+        insert_website_data(websites, website_url, title, description)
+        return title, description
 
 
 def database_save(collection, article):
@@ -79,7 +109,7 @@ def init_praw():
     reddit.login(USERNAME, PASSWORD)
     return reddit
 
-def get_submissions(reddit_obj, subreddit='all', sorting_type='hot', limit=1000):
+def get_submissions(reddit_obj, subreddit='', sorting_type='hot', limit=1000):
     """
     returns array of submission instaces
     """
@@ -89,9 +119,12 @@ def get_submissions(reddit_obj, subreddit='all', sorting_type='hot', limit=1000)
         'hot': 'get_hot',
         'new': 'get_new'
     }
-    subreddit = reddit_obj.get_subreddit(subreddit)
+    if subreddit:
+        subreddit = reddit_obj.get_subreddit(subreddit)
     # ref: http://stackoverflow.com/questions/3061/calling-a-function-from-a-string-with-the-functions-name-in-python
-    submissions = getattr(subreddit, subreddit_sorting[sorting_type])(limit=limit)
+        submissions = getattr(subreddit, subreddit_sorting[sorting_type])(limit=limit)
+    else:
+        submissions = reddit_obj.get_content('http://www.reddit.com/', limit=limit)
     return [submission for submission in submissions]
 
 
@@ -99,42 +132,53 @@ def get_submission_content(submission):
     """
     returns a dict from submission instance containing data from the submission
     """
-    #TODO: skip submission if submission_id is already in database
     #TODO: handle twitter post, ref: http://blog.hubspot.com/marketing/embed-social-media-posts-guide
     #TODO: if description_preview is empty and summary_preview is available, use first few sentences probably??
     #handle google translated page (or just skip it???)
     #TODO: if wikipedia, use first sentence as description, the rest as summary. Also include pcture if you can
 
-    response = ''
-    soup = ''
-    response = open_page(submission.url)
-    if response:
-        soup = soupify_page(html_text=response.text)
-    if soup:
-        submission_data = {}
-        submission_data['title'] = get_submission_title(submission)
-        submission_data['url'] = get_submission_url(submission)
-        submission_data['value'] = get_submission_value(submission)
-        submission_data['comment_number'] = get_submission_comment_number(submission)
-        submission_data['comment_url'] = get_submission_comment_url(submission)
-        submission_data['video_preview'] = get_submission_video_preview(submission, soup)
-        submission_data['picture_preview'] = get_submission_picture_preview(submission, soup)
+    article = article_from_db(submission.id)
+    if article:
+        
+        #debugggggggggggg
+        print 'article already exist, reddit comment id:', submission.id
+        print 'old upvote: ', article['value'], ' new upvote: ', get_submission_value(submission)
+        print 'old comment: ', article['comment_number'], ' new comment: ', get_submission_comment_number(submission)
+        
+        article['value'] = get_submission_value(submission)
+        article['comment_number'] = get_submission_comment_number(submission)
+    else:
+        response = ''
+        soup = ''
+        response = open_page(submission.url)
+        if response:
+            soup = soupify_page(html_text=response.text)
+        if soup:
+            submission_data = {}
+            domain_title, domain_description = get_domain_data(submission.url)
+            submission_data['title'] = get_submission_title(submission)
+            page_url = get_submission_url(submission)
+            submission_data['url'] = page_url
+            submission_data['value'] = get_submission_value(submission)
+            submission_data['comment_number'] = get_submission_comment_number(submission)
+            submission_data['comment_url'] = get_submission_comment_url(submission)
+            submission_data['video_preview'] = get_submission_video_preview(submission, soup)
+            submission_data['picture_preview'] = get_submission_picture_preview(submission, soup)
 
 
-        submission_data['self_post_preview'] = get_submission_self_post_preview(submission)
-        title = get_metadata_title(soup) # <--- validate this title to with the website main domain before using as summary_target
-        description = get_submission_description_preview(submission, soup, title)
-        submission_data['description_preview'] = description
-        summary_target_test = title + ' ' + description
-        submission_data['summary_preview'] = get_submission_summary_preview(submission, summary_target_test, title, response)
+            submission_data['self_post_preview'] = get_submission_self_post_preview(submission)
+            title = get_page_title(soup, domain_title)
+            description = get_submission_description_preview(submission, soup, title, domain_description)
+            submission_data['description_preview'] = description
+            summary_target_test = title + ' ' + description
+            submission_data['summary_preview'] = get_submission_summary_preview(submission, summary_target_test, title, response)
 
-        submission_data['comment_preview'] = get_submission_comment_preview(submission)
-        submission_data['created_utc'] = submission.created_utc
-        submission_data['submission_id'] = submission.id
-        submission_data['saved_utc'] = get_utc_now()
+            submission_data['comment_preview'] = get_submission_comment_preview(submission)
+            submission_data['created_utc'] = submission.created_utc
+            submission_data['submission_id'] = submission.id
+            submission_data['saved_utc'] = get_utc_now()
 
-
-        return submission_data
+            return submission_data
 
     return {}
 
@@ -165,6 +209,14 @@ def get_preview_selftext(submission):
 def get_utc_now():
     now = datetime.datetime.utcnow()
     return calendar.timegm(now.utctimetuple())
+
+def get_page_title(soup, domain_title):
+    title = get_metadata_title(soup)
+    if title:
+        if title != domain_title:
+            return title
+    return ''
+
 
 
 def is_wikipedia(submission):
@@ -381,34 +433,10 @@ def get_subdomain(url):
     return parsed_uri.scheme + '://' + parsed_uri.netloc + '/'
 
 
-def insert_website_data(collection_obj, website_url, title, description):
-    new_website = {'website': website_url, 'title': title, 'description': description}
-    print '\nSaving website data: '
-    pprint(new_website)
-    website_id = collection_obj.insert(new_website)
-    print 'Saved website data with id: ', website_id , '\n'
-    return
-
-
-def query_website_data(website_url):
-    websites = website_collection()
-    website_data = websites.find_one({'website':website_url})
-    if website_data:
-        print '\ndebugging, website data: '
-        pprint(website_data)
-        print '\n'
-        return website_data['description']
-    else:
-        soup = soupify_page(url=website_url)
-        title = get_metadata_title(soup)
-        description = get_metadata_description(soup)
-        insert_website_data(websites, website_url, title, description)
-        return description
-
-def get_domain_description(url):
+def get_domain_data(url):
     subdomain = get_subdomain(url)
-    domain_description = query_website_data(subdomain)
-    return domain_description
+    return query_website_data(subdomain)
+
 
 
 def valid_description(description, title, domain_description):
@@ -418,17 +446,16 @@ def valid_description(description, title, domain_description):
 
 
 SKIP_DOMAIN_DESCRIPTION = ['youtube', 'youtu','wikipedia']
-def get_preview_description(submission, soup, title):
+def get_preview_description(submission, soup, title, domain_description):
     if get_domain(submission.url) not in SKIP_DOMAIN_DESCRIPTION:
         description = get_metadata_description(soup)
-        domain_description = get_domain_description(submission.url)
         if valid_description(description, title, domain_description):
             return description
         else:
             print '\ndescription validity test FAILED for url: ', submission.url, '\n'
     return ''
 
-def get_submission_description_preview(submission, soup, title):
+def get_submission_description_preview(submission, soup, title, domain_description):
     preview = ''
     if is_wikipedia(submission):
         #silly but valid url: http://en.wikipedia.org/w/index.php?title=Pneumonoultramicroscopicsilicovolcanoconiosis
@@ -442,7 +469,7 @@ def get_submission_description_preview(submission, soup, title):
         #example: http://www.reddit.com/r/Fireteams/comments/2gathq/ps4_22_titan_lf_weekly/
         #TODO:if self post with no selftext, stats on comments will be the default comment. change or check for this mkay... 
         #DEBUG: http://www.reddit.com/r/Showerthoughts/comments/2gijsn/if_we_pop_bubble_wrap_made_in_china_the_air_that/
-        preview = get_preview_description(submission, soup, title)
+        preview = get_preview_description(submission, soup, title, domain_description)
     return preview
 
 
@@ -574,13 +601,13 @@ def get_submission_comment_preview(submission):
 
 
 def main():
-    articles = article_collection() #done testing: news+worldnews+wikipedia+all+self , spacex+teslamotors+elonmusk+news+worldnews+wikipedia
+    articles = article_collection() #done testing: spacex+teslamotors+elonmusk+news+worldnews+wikipedia+startup
     try:
         reddit = init_praw()
     except:
         print 'problem connecting to reddit, please check if the website is live. Please try again later'
         return
-    submissions = get_submissions(reddit, subreddit='spacex+teslamotors+elonmusk+news+worldnews+wikipedia', sorting_type='hot', limit=300)
+    submissions = get_submissions(reddit, limit=500)
     for submission in submissions:
         new_article = get_submission_content(submission)
         if new_article:
