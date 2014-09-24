@@ -35,7 +35,7 @@ content-page (full preview and comments)
 
 '''
 REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
-REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1808@gmail.com)'
+REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:)'
 USERNAME = 'plz_hire_me_reddit'
 PASSWORD = '****'
 
