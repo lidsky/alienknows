@@ -34,10 +34,13 @@ comments-preview
 content-page (full preview and comments)
 
 '''
+
 REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
-REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:)'
+REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1)'
 USERNAME = 'plz_hire_me_reddit'
 PASSWORD = '****'
+
+
 
 def database_connect():
     client = MongoClient('mongodb://localhost/alienknows-dev')
@@ -154,6 +157,11 @@ def get_submission_content(submission):
         if response:
             soup = soupify_page(html_text=response.text)
         if soup:
+
+            #testingggggggg
+            if 'youtu' in get_domain(submission.url):
+                return {}
+
             submission_data = {}
             domain_title, domain_description = get_domain_data(submission.url)
             submission_data['title'] = get_submission_title(submission)
@@ -557,11 +565,29 @@ def get_submission_video_preview(submission, soup):
     video_headers = ['video', 'application/x-shockwave-flash']
     preview = get_submission_media_preview(submission, video_headers, 'video', soup)
     if preview:
-        for player in SKIP_VIDEO_AUTOPLAY:
-            if player in preview:
-                return ''
+
+        # for player in SKIP_VIDEO_AUTOPLAY:
+        #     if player in preview:
+        #         return ''
+
         #this wont work for "http://gfycat.com/InnocentEnragedBushbaby"
-        preview += '&autoplay=0&autoplay=false&autostart=false&autostart=0'
+        # preview += '&autoplay=0&autoplay=false&autostart=false&autostart=0'
+        preview += '&autoplay=true&autoplay=1&autostart=true&autostart=1'
+
+        '''
+        problem appending:
+        1. instagram: http://instagram.com/p/sqkzo4HeOO/
+        2. gfycat: http://gfycat.com/InnocentEnragedBushbaby
+        3. .swf extension: http://media.mtvnservices.com/fb/mgid:arc:video:comedycentral.com:2a50884a-ed01-11e0-aca6-0026b9414f30.swf
+        4. .mp4 extension: http://content_us.fashiontube.com/103/ce41eaf4-6c5b-4402-bf47-3da69dfeb5c2/640x.mp4
+
+        problem in general:
+        1. cnn: http://www.cnn.com/video/data/2.0/video/bestoftv/2014/09/23/morning-minute-9-23-14.cnn.html
+        2. liveleak: http://www.liveleak.com/view?i=e13_1411302799
+
+        '''
+
+
     return preview
 
 def get_submission_picture_preview(submission, soup):
@@ -607,7 +633,7 @@ def main():
     except:
         print 'problem connecting to reddit, please check if the website is live. Please try again later'
         return
-    submissions = get_submissions(reddit, limit=500)
+    submissions = get_submissions(reddit, subreddit='videos', sorting_type='hot', limit=1000)
     for submission in submissions:
         new_article = get_submission_content(submission)
         if new_article:

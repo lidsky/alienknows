@@ -36,26 +36,34 @@
 					</a>
 				</div>
 
-				<div class="preview-picture" 
-					 data-ng-if="!article.video_preview && !!article.picture_preview">
+				<div class="preview-picture" data-ng-if="!article.showVideo && !article.showVideo">
 					<a data-ng-href="{{article.url}}" 
 					   target="_blank" 
 					   data-ng-class="{'show-less': !article.showVideo}"
 					   data-easy-preview
 					   data-more="article.showVideo">
 						<img data-ng-src="{{article.picture_preview}}"/>
+						<i data-ng-class="{'play-vid-icon': !!article.video_preview}"></i>
 					</a>
 					
 				</div>
 
-				<div data-ng-if="!!article.video_preview" class="preview-video">
+
+				<div class="preview-video" data-ng-if="article.showVideo">
+					<object data-ng-attr-data="{{article.video_preview}}"></object>
+				</div>
+
+
+
+
+				<!-- <div data-ng-if="!!article.video_preview" class="preview-video"> -->
 			<!-- 		http://beerpla.net/2010/01/12/are-your-youtube-video-embeds-missing-the-full-screen-button-here-is-how-to-fix-it/
 					http://stackoverflow.com/questions/14903112/angularjs-expression-in-html-object-tag -->
 					<!-- or just use iframe..?? -->
-					<object data-ng-attr-data="{{article.video_preview}}">
-					</object>
+					<!-- <object data-ng-attr-data="{{article.video_preview}}">
+					</object> -->
 
-				</div>
+				<!-- </div> -->
 
 				<!-- TODO: sanitize input ref: https://docs.angularjs.org/api/ng/service/$sce -->
 				<div class="preview-text"
@@ -75,21 +83,26 @@
 				</div>
 
 
-				<div class="preview-value-container" data-ng-show="article.value">
+				<div class="preview-value-container comment-number-container" data-ng-show="article.value">
 					<span class="preview-more-text-font">
-						<span class="social-currency">zł </span> 
+						<!-- <span class="social-currency">zł </span> -->
+						<span class="glyphicon glyphicon-thumbs-up"></span>
+
 						{{article.value}}
 					</span>
-				</div>
-
-
-				<div class="comment-number-container">
 					<a data-ng-href="{{article.comment_url}}" target="_blank">
 						<span class="glyphicon glyphicon-comment"></span>
 						<span class="comment-number">{{article.comment_number}}</span>
 					</a>
+				</div>
 
-				</div> 
+
+		<!-- 		<div class="comment-number-container">
+					<a data-ng-href="{{article.comment_url}}" target="_blank">
+						<span class="glyphicon glyphicon-comment"></span>
+						<span class="comment-number">{{article.comment_number}}</span>
+					</a>
+				</div>  -->
 
 			</div>
 		</div>

@@ -88,6 +88,18 @@ span.preview-title {
     margin: auto;
 }
 
+.play-vid-icon {
+    background-image: url('../img/play.png');
+    background-repeat: no-repeat;
+    height: 72px;
+    width: 72px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -36px 0 0 -36px;
+
+}
+
 .preview-video object {
     width: 433px;
     height: 350px;

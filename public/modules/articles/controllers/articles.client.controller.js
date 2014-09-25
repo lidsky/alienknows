@@ -72,7 +72,8 @@ angular.module('articles').controller('ArticlesController', ['$scope', '$statePa
 				Articles.query({currentUtc: $scope.lastArticleUTC}, function(articles) {
 					console.log('here in articles query');
 					angular.forEach(articles, function(article, index) {
-						if ($scope.articleList.indexOf(article) === -1) {
+						if ($scope.articleList.indexOf(article) === -1 && !!article.video_preview) {
+							// article.video_preview = article.video_preview.replace('&autoplay=true&autoplay=1&autostart=true&autostart=1','');
 							$scope.articleList.push(article);
 						} else {
 							console.log('DUPLICATE!: ');
@@ -81,7 +82,12 @@ angular.module('articles').controller('ArticlesController', ['$scope', '$statePa
 					
 					});
 
-					$scope.lastArticleUTC = articles[articles.length - 1].saved_utc;
+					if (!!articles[articles.length - 1]) {
+						$scope.lastArticleUTC = articles[articles.length - 1].saved_utc;
+					} else {
+						$scope.lastArticleUTC = getCurrentUTC();
+					}
+					
 					$scope.isBusy = false;
 
 				});
