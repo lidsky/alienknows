@@ -158,8 +158,8 @@ def get_submission_content(submission):
             soup = soupify_page(html_text=response.text)
         if soup:
 
-            #testingggggggg
-            if 'youtu' in get_domain(submission.url):
+            domain = get_domain(submission.url)
+            if 'youtu' in domain or 'vimeo' in domain or 'dailymotion' in domain:
                 return {}
 
             submission_data = {}
@@ -572,18 +572,43 @@ def get_submission_video_preview(submission, soup):
 
         #this wont work for "http://gfycat.com/InnocentEnragedBushbaby"
         # preview += '&autoplay=0&autoplay=false&autostart=false&autostart=0'
-        preview += '&autoplay=true&autoplay=1&autostart=true&autostart=1'
+        preview += '&autoplay=true&autoPlay=true&autostart=true&autoStart=true'
 
         '''
         problem appending:
         1. instagram: http://instagram.com/p/sqkzo4HeOO/
         2. gfycat: http://gfycat.com/InnocentEnragedBushbaby
         3. .swf extension: http://media.mtvnservices.com/fb/mgid:arc:video:comedycentral.com:2a50884a-ed01-11e0-aca6-0026b9414f30.swf
-        4. .mp4 extension: http://content_us.fashiontube.com/103/ce41eaf4-6c5b-4402-bf47-3da69dfeb5c2/640x.mp4
+        4. .mp4 extension: http://content_us.fashiontube.com/103/ce41eaf4-6c5b-4402-bf47-3da69dfeb5c2/640x.mp4 --- iframe
 
         problem in general:
         1. cnn: http://www.cnn.com/video/data/2.0/video/bestoftv/2014/09/23/morning-minute-9-23-14.cnn.html
         2. liveleak: http://www.liveleak.com/view?i=e13_1411302799
+
+
+        No problem:
+        1. youtube
+        2. vimeo
+        3. dailymotion
+        4. vid.me
+
+
+        SOLUTION:
+
+
+        1) gyfcat:
+
+            <video  width="500" height="283" autoplay controls>     
+                <source src="http://zippy.gfycat.com/MiserlyJaggedGangesdolphin.webm" type="video/webm">
+                <source src="http://zippy.gfycat.com/MiserlyJaggedGangesdolphin.mp4" type="video/mp4">
+            </video>  
+
+        2) .mp4
+
+            <video  width="500" height="283" autoplay controls>     
+                <source src="http://content_us.fashiontube.com/103/ce41eaf4-6c5b-4402-bf47-3da69dfeb5c2/640x.mp4" type="video/mp4">
+            </video> 
+
 
         '''
 
@@ -616,10 +641,35 @@ def get_submission_media_preview(submission, header_type, media_type, soup):
         preview = submission.url
     else:
         if media_type == 'video':
-            preview = get_preview_video(soup)
+            preview = get_page_video(submission.url, soup)
         elif media_type == 'picture': 
             preview = get_preview_picture(soup)
     return preview
+
+
+def get_page_video(url, soup):
+    video_url = ''
+    if get_domain(url) == 'liveleak':
+        return liveleak_video(soup)
+    else:
+        return get_preview_video(soup)
+
+def liveleak_video(soup):
+    embed_url = 'http://www.liveleak.com/ll_embed?f='
+    embed_id_raw = ''
+    if soup:
+        a_tags = soup.find_all('a')
+        for tag in a_tags:
+            if tag.text == 'Embed Code':
+                if 'onclick' in tag.attrs:
+                    embed_id_raw = tag['onclick']
+    if embed_id_raw:
+        start_marker = "generate_embed_code_generator_html('"
+        end_marker = "'))"
+        start = embed_id_raw.find(start_marker) + len(start_marker)
+        end = embed_id_raw.find(end_marker)
+        return embed_url + embed_id_raw[start:end]
+    return '' 
 
 
 def get_submission_comment_preview(submission):
@@ -633,7 +683,7 @@ def main():
     except:
         print 'problem connecting to reddit, please check if the website is live. Please try again later'
         return
-    submissions = get_submissions(reddit, subreddit='videos', sorting_type='hot', limit=1000)
+    submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='hot', limit=10000)
     for submission in submissions:
         new_article = get_submission_content(submission)
         if new_article:
