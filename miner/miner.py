@@ -36,11 +36,15 @@ content-page (full preview and comments)
 
 '''
 
-REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
-REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1)'
-USERNAME = 'plz_hire_me_reddit'
-PASSWORD = '****'
+# REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
+# REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1)'
+# USERNAME = 'plz_hire_me_reddit'
+# PASSWORD = '****'
 
+REQUEST_HEADER = { 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)' }
+REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1808@gmail.com)'
+USERNAME = 'plz_hire_me_reddit'
+PASSWORD = 'alienknows89'
 
 
 def database_connect():
@@ -488,9 +492,12 @@ def get_submission_summary_preview(submission, target_test, title, response):
 
 def get_preview_video(soup):
     if soup:
-        og_vid = get_og_property(soup, 'video')
-        if og_vid:
-            return og_vid
+        og_vids = get_og_property(soup, 'video', deep=True)
+        for og_vid in og_vids:
+            if og_vid.endswith('.mp4'):
+                return og_vid
+        if len(og_vids) > 0:
+            return og_vids[0]
         tw_vid = get_twitter_property(soup, 'player')
         if tw_vid:
             return tw_vid
@@ -584,7 +591,6 @@ def get_submission_video_preview(submission, soup):
 
         problem in general:
         1. cnn: http://www.cnn.com/video/data/2.0/video/bestoftv/2014/09/23/morning-minute-9-23-14.cnn.html
-        2. liveleak: http://www.liveleak.com/view?i=e13_1411302799
 
 
         No problem:
@@ -664,6 +670,7 @@ def liveleak_video(soup):
             if tag.text == 'Embed Code':
                 if 'onclick' in tag.attrs:
                     embed_id_raw = tag['onclick']
+                    break
     if embed_id_raw:
         start_marker = "generate_embed_code_generator_html('"
         end_marker = "'))"
@@ -674,9 +681,11 @@ def liveleak_video(soup):
 
 def gfycat_video(url):
     gyfcat_api = 'http://gfycat.com/cajax/get/'
-    start_marker = url.rfind('/') + 1
-    end_marker = url.find('?')
-    api_url = gyfcat_api + url[start_marker:end_marker]
+    start = url.rfind('/') + 1
+    end = url.find('?')
+    if end == -1:
+        end = len(url)
+    api_url = gyfcat_api + url[start:end]
     response = open_page(api_url, text=True)
     json_response = json.loads(response)
     if json_response:

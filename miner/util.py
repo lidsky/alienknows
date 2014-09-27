@@ -7,10 +7,14 @@ STRING_LITERAL = ['\n', '\\']
 htmlParser = HTMLParser.HTMLParser()
 
 
-def get_og_property(soup, og_prop):
+def get_og_property(soup, og_prop, deep=False):
     if soup:
-        node = soup.find('meta', {'property': 'og:' + og_prop})
-        return get_content_from_node(node)
+        if deep:
+            nodes = soup.find_all('meta', {'property': 'og:' + og_prop})
+            return [get_content_from_node(node) for node in nodes]
+        else:
+            node = soup.find('meta', {'property': 'og:' + og_prop})
+            return get_content_from_node(node)
     return ''
 
 def get_twitter_property(soup, tw_prop):
