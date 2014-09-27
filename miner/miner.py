@@ -15,6 +15,7 @@ import datetime
 import calendar
 import inflection
 import nltk
+import json
 
 from pymongo import MongoClient
 
@@ -593,17 +594,15 @@ def get_submission_video_preview(submission, soup):
         4. vid.me
 
 
+        SOLVED PARSING:
+        1. liveleak
+        2. gyfcat (.mp4 ending)
+
+
+
         SOLUTION:
 
-
-        1) gyfcat:
-
-            <video  width="500" height="283" autoplay controls>     
-                <source src="http://zippy.gfycat.com/MiserlyJaggedGangesdolphin.webm" type="video/webm">
-                <source src="http://zippy.gfycat.com/MiserlyJaggedGangesdolphin.mp4" type="video/mp4">
-            </video>  
-
-        2) .mp4
+        1) .mp4
 
             <video  width="500" height="283" autoplay controls>     
                 <source src="http://content_us.fashiontube.com/103/ce41eaf4-6c5b-4402-bf47-3da69dfeb5c2/640x.mp4" type="video/mp4">
@@ -651,6 +650,8 @@ def get_page_video(url, soup):
     video_url = ''
     if get_domain(url) == 'liveleak':
         return liveleak_video(soup)
+    elif get_domain(url) == 'gfycat':
+        return gfycat_video(url)
     else:
         return get_preview_video(soup)
 
@@ -669,7 +670,20 @@ def liveleak_video(soup):
         start = embed_id_raw.find(start_marker) + len(start_marker)
         end = embed_id_raw.find(end_marker)
         return embed_url + embed_id_raw[start:end]
-    return '' 
+    return ''
+
+def gfycat_video(url):
+    gyfcat_api = 'http://gfycat.com/cajax/get/'
+    start_marker = url.rfind('/') + 1
+    end_marker = url.find('?')
+    api_url = gyfcat_api + url[start_marker:end_marker]
+    response = open_page(api_url, text=True)
+    json_response = json.loads(response)
+    if json_response:
+        if 'gfyItem' in json_response:
+            if 'mp4Url' in json_response['gfyItem']:
+                return json_response['gfyItem']['mp4Url']
+    return ''
 
 
 def get_submission_comment_preview(submission):
@@ -683,7 +697,7 @@ def main():
     except:
         print 'problem connecting to reddit, please check if the website is live. Please try again later'
         return
-    submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='hot', limit=10000)
+    submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='new', limit=10000)
     for submission in submissions:
         new_article = get_submission_content(submission)
         if new_article:
