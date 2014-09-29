@@ -565,9 +565,11 @@ def is_content_type(url, header_list):
 #TODO: rather than skipping them altogether, maybe a click to expand abnd show the player
 SKIP_VIDEO_AUTOPLAY = ['flowplayer', 'brightcove.com', 'BloombergPlayer.swf']
 def get_submission_video_preview(submission, soup):
-    #TODO: some video autoplays?? wtf??? example: http://www.telegraph.co.uk/news/uknews/scottish-independence/11092392/Do-the-Scots-really-want-to-stop-running-Britain.html
-    #sol modify src url (add '&autoplay=0&autoplay=false'): http://www.therightplanet.com/2013/12/blogging-tip-how-to-turn-those-doggone-autoplay-videos-off/ 
-    #another prob: https://v.cdn.vine.co/r/videos/082685C68F1122617932342812672_220895658d0.5.1.10840199946545656233.mp4?versionId=BKp4O3wVv_a.pNePglWRwiSof_C1cbUp
+    #TODO: some video autoplays?? wtf??? 
+    #example: http://www.telegraph.co.uk/news/uknews/scottish-independence/11092392/Do-the-Scots-really-want-to-stop-running-Britain.html
+    #sol modify src url (add '&autoplay=0&autoplay=false'): 
+    #http://www.therightplanet.com/2013/12/blogging-tip-how-to-turn-those-doggone-autoplay-videos-off/ 
+    #prob: https://v.cdn.vine.co/r/videos/082685C68F1122617932342812672_220895658d0.5.1.10840199946545656233.mp4?versionId=BKp4O3wVv_a.pNePglWRwiSof_C1cbUp
     #TODO: deal with twitch.tv example: http://www.twitch.tv/ichalvl
     preview = ''
     video_headers = ['video', 'application/x-shockwave-flash']
@@ -580,7 +582,7 @@ def get_submission_video_preview(submission, soup):
 
         #this wont work for "http://gfycat.com/InnocentEnragedBushbaby"
         # preview += '&autoplay=0&autoplay=false&autostart=false&autostart=0'
-        preview += '&autoplay=true&autoPlay=true&autostart=true&autoStart=true'
+        # preview += '&autoplay=true&autoPlay=true&autostart=true&autoStart=true'
 
         '''
         problem appending:
@@ -623,7 +625,8 @@ def get_submission_video_preview(submission, soup):
 def get_submission_picture_preview(submission, soup):
     #if self post reddit, find image in the self text
     #find in website <img> tags with relevent alt attribute or img url
-    #BBC og:image is a fucking joke, demo: http://www.bbc.com/news/world-middle-east-29186506 , oh nyt too: http://opinionator.blogs.nytimes.com/2014/02/08/how-single-motherhood-hurts-kids/?smid=re-share
+    #BBC og:image is a fucking joke, demo: http://www.bbc.com/news/world-middle-east-29186506 , 
+    #oh nyt too: http://opinionator.blogs.nytimes.com/2014/02/08/how-single-motherhood-hurts-kids/?smid=re-share
     #DEBUG: http://www.reddit.com/r/soccer/comments/2gjm6q/carlo_ancelotti_and_chicharito_before_the_mexican/
     preview = ''
     picture_headers = ['image']
@@ -706,7 +709,7 @@ def main():
     except:
         print 'problem connecting to reddit, please check if the website is live. Please try again later'
         return
-    submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='new', limit=10000)
+    submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='hot', limit=10000)
     for submission in submissions:
         new_article = get_submission_content(submission)
         if new_article:

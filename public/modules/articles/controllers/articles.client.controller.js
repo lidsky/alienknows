@@ -74,6 +74,9 @@ angular.module('articles').controller('ArticlesController', ['$scope', '$statePa
 					angular.forEach(articles, function(article, index) {
 						if ($scope.articleList.indexOf(article) === -1 && !!article.video_preview) {
 							// article.video_preview = article.video_preview.replace('&autoplay=true&autoplay=1&autostart=true&autostart=1','');
+							if (!!article.video_preview && !article.picture_preview) {
+								article.picture_preview = 'http://i.imgur.com/shZlsma.png';
+							}
 							$scope.articleList.push(article);
 						} else {
 							console.log('DUPLICATE!: ');
