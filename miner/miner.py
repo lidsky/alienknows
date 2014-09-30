@@ -36,15 +36,12 @@ content-page (full preview and comments)
 
 '''
 
-# REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
-# REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1)'
-# USERNAME = 'plz_hire_me_reddit'
-# PASSWORD = '****'
-
-REQUEST_HEADER = { 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)' }
-REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1808@gmail.com)'
+REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
+REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1)'
 USERNAME = 'plz_hire_me_reddit'
-PASSWORD = 'alienknows89'
+PASSWORD = '****'
+
+
 
 
 def database_connect():
@@ -163,9 +160,9 @@ def get_submission_content(submission):
             soup = soupify_page(html_text=response.text)
         if soup:
 
-            domain = get_domain(submission.url)
-            if 'youtu' in domain or 'vimeo' in domain or 'dailymotion' in domain:
-                return {}
+            # domain = get_domain(submission.url)
+            # if 'youtu' in domain or 'vimeo' in domain or 'dailymotion' in domain:
+            #     return {}
 
             submission_data = {}
             domain_title, domain_description = get_domain_data(submission.url)
@@ -581,6 +578,7 @@ def get_submission_video_preview(submission, soup):
         #         return ''
 
         #this wont work for "http://gfycat.com/InnocentEnragedBushbaby"
+        # &autoplay=true&autoplay=1&autostart=true&autostart=1
         # preview += '&autoplay=0&autoplay=false&autostart=false&autostart=0'
         # preview += '&autoplay=true&autoPlay=true&autostart=true&autoStart=true'
 
@@ -662,6 +660,8 @@ def get_page_video(url, soup):
     elif get_domain(url) == 'gfycat':
         return gfycat_video(url)
     else:
+        #TODO: check if video preview link is valid
+        # non valid: http://bangordailynews.com/video/two-headed-snapping-turtle-found-in-hudson/
         return get_preview_video(soup)
 
 def liveleak_video(soup):
@@ -709,7 +709,7 @@ def main():
     except:
         print 'problem connecting to reddit, please check if the website is live. Please try again later'
         return
-    submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='hot', limit=10000)
+    submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='new', limit=10000)
     for submission in submissions:
         new_article = get_submission_content(submission)
         if new_article:

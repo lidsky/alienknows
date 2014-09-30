@@ -38,16 +38,18 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 		*/
 
 		var validAutoplay = function(videoUrl) {
-			return videoUrl.substring(videoUrl.length - 4) !== '.mp4' &&  videoUrl.indexOf('hulu') === -1;
+			return videoUrl.substring(videoUrl.length - 4) !== '.mp4' && 
+						 videoUrl.substring(videoUrl.length - 4) !== '.swf' &&  
+						 videoUrl.indexOf('hulu') === -1;
 		};
 
 
 		var autoplayUrl = function(videoUrl) {
 			if (validAutoplay(videoUrl)) {
 				if (videoUrl.indexOf('?') === -1) {
-					return videoUrl + '?autoplay=true&autoPlay=true&autostart=true&autoStart=true';
+					return videoUrl + '?autoplay=true&autoPlay=true&autostart=true&autoStart=true' + '&output=embed';
 				} else {
-					return videoUrl + '&autoplay=true&autoPlay=true&autostart=true&autoStart=true';
+					return videoUrl + '&autoplay=true&autoPlay=true&autostart=true&autoStart=true' + '&output=embed';
 				}
 			} else {
 				return videoUrl;
@@ -58,6 +60,7 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 		var getTemplate = function(video, picture) {
 			if (!!video) {
 				if (video.substring(video.length - 4) === '.mp4') {
+					console.log('in mp4 for url vid', video);
 					return '<video controls autoplay><source data-ng-src="{{article.picture_preview}}" type="video/mp4"></video>';
 				} else {
 					// append or not append autoplay
@@ -76,7 +79,7 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 				article: '='
 			},
 			link: function postLink(scope, element, attrs) {
-				// scope.article.video_preview = autoplayUrl(scope.article.video_preview);
+				scope.article.video_preview = autoplayUrl(scope.article.video_preview);
 				element.html(getTemplate(scope.article.picture_preview, scope.article.video_preview)).show();
 
 				scope.$watch('article', function(newVal) {
