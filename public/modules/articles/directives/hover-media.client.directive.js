@@ -54,7 +54,7 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 		// ref 1: http://stackoverflow.com/questions/23065165/angularjs-directive-dynamic-templates
 		// ref 2: http://onehungrymind.com/angularjs-dynamic-templates/ 
 		var getTemplate = function(video, picture) {
-			if (!!video) {
+			if (video) {
 				if (video.substring(video.length - 4) === '.mp4') {
 					console.log('in mp4 for url vid', video);
 					return '<video controls autoplay><source data-ng-src="{{article.video_preview}}" type="video/mp4"></video>';
@@ -74,12 +74,15 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 				article: '='
 			},
 			link: function postLink(scope, element, attrs) {
-				scope.article.video_preview = autoplayUrl(scope.article.video_preview);
-				element.html(getTemplate(scope.article.picture_preview, scope.article.video_preview)).show();
 
-				scope.$watch('article', function(newVal) {
-					$compile(element.contents())(scope);
-				});
+				if (!!scope.article.video_preview) {
+					scope.article.video_preview = autoplayUrl(scope.article.video_preview);
+					element.html(getTemplate(scope.article.picture_preview, scope.article.video_preview)).show();
+
+					scope.$watch('article', function(newVal) {
+						$compile(element.contents())(scope);
+					});
+				}
 
 			}
 		};

@@ -34,8 +34,6 @@ PASSWORD = '****'
 
 
 
-
-
 def database_connect():
     client = MongoClient('mongodb://localhost/alienknows-dev')
     db = client['alienknows-dev']
@@ -147,40 +145,56 @@ def get_submission_content(submission):
     else:
         response = ''
         soup = ''
+        print 'opening page'
         response = open_page(submission.url)
         if response:
-            soup = soupify_page(html_text=response.text)
-        if soup:
+            print 'soupifying page'
 
-            domain = get_domain(submission.url)
-            if 'youtu' in domain or 'vimeo' in domain or 'dailymotion' in domain:
-                return {}
+            #if type is not text, will stuck at response.text 
+            if 'text/html' in response.headers['content-type']:
+                soup = soupify_page(html_text=response.text)
+        # if soup:
 
-            submission_data = {}
-            domain_title, domain_description = get_domain_data(submission.url)
-            submission_data['title'] = get_submission_title(submission)
-            page_url = get_submission_url(submission)
-            submission_data['url'] = page_url
-            submission_data['value'] = get_submission_value(submission)
-            submission_data['comment_number'] = get_submission_comment_number(submission)
-            submission_data['comment_url'] = get_submission_comment_url(submission)
-            submission_data['video_preview'] = get_submission_video_preview(submission, soup)
-            submission_data['picture_preview'] = get_submission_picture_preview(submission, soup)
+        submission_data = {}
+
+        print 'page domain data'
+        domain_title, domain_description = get_domain_data(submission.url)
+
+        submission_data['title'] = get_submission_title(submission)
+        page_url = get_submission_url(submission)
+
+        submission_data['url'] = page_url
+        submission_data['value'] = get_submission_value(submission)
+        submission_data['comment_number'] = get_submission_comment_number(submission)
+        submission_data['comment_url'] = get_submission_comment_url(submission)
 
 
-            submission_data['self_post_preview'] = get_submission_self_post_preview(submission)
-            title = get_page_title(soup, domain_title)
-            description = get_submission_description_preview(submission, soup, title, domain_description)
-            submission_data['description_preview'] = description
-            summary_target_test = title + ' ' + description
-            submission_data['summary_preview'] = get_submission_summary_preview(submission, summary_target_test, title, response)
+        print 'page video'
+        video_preview = get_submission_video_preview(submission, soup)
+        submission_data['video_preview'] = video_preview
+        
+        print 'page picture'
+        submission_data['picture_preview'] = get_submission_picture_preview(submission, soup, video_preview)
 
-            submission_data['comment_preview'] = get_submission_comment_preview(submission)
-            submission_data['created_utc'] = submission.created_utc
-            submission_data['submission_id'] = submission.id
-            submission_data['saved_utc'] = get_utc_now()
+        submission_data['self_post_preview'] = get_submission_self_post_preview(submission)
 
-            return submission_data
+        print 'page title'
+        title = get_page_title(soup, domain_title)
+
+        print 'page description'
+        description = get_submission_description_preview(submission, soup, title, domain_description)
+        submission_data['description_preview'] = description
+        summary_target_test = title + ' ' + description
+
+        print 'page summary_preview'
+        submission_data['summary_preview'] = get_submission_summary_preview(submission, summary_target_test, title, response)
+
+        submission_data['comment_preview'] = get_submission_comment_preview(submission)
+        submission_data['created_utc'] = submission.created_utc
+        submission_data['submission_id'] = submission.id
+        submission_data['saved_utc'] = get_utc_now()
+
+        return submission_data
 
     return {}
 
@@ -322,8 +336,9 @@ def get_metadata_title(soup):
     meta_title = get_meta_property(soup, 'title')
     if meta_title:
         return meta_title
-    if soup.find('title'):
-        return soup.find('title').get_text()
+    if soup:
+        if soup.find('title'):
+            return soup.find('title').get_text()
     return ''
 
 
@@ -404,7 +419,7 @@ def get_preview_website(url, target_test, title, response):
             pass
         except:
             print 'in get_preview_website, problem with pyteaser.SummarizeUrl, submission.url: ', url
-        if not sentence_array and title and response and response.ok:
+        if not sentence_array and title and response and response.ok and 'text/html' in response.headers['content-type']:
             body_text = extract_article(response.text)
             try:
                 sentence_array = pyteaser.Summarize(title, body_text)
@@ -559,7 +574,7 @@ def get_submission_video_preview(submission, soup):
     return preview
 
 PICTURE_HEADERS = ['image']
-def get_submission_picture_preview(submission, soup):
+def get_submission_picture_preview(submission, soup, video_preview):
     #if self post reddit, find image in the self text
     #find in website <img> tags with relevent alt attribute or img url
     #BBC og:image is a fucking joke, demo: http://www.bbc.com/news/world-middle-east-29186506 , 
@@ -577,6 +592,14 @@ def get_submission_picture_preview(submission, soup):
     # if preview:
     #     if 'http' not in preview: 
     #         preview = 'http://' + submission.domain + preview
+
+    #generic video thumbnail
+    if video_preview and not preview:
+        preview = 'http://i.imgur.com/shZlsma.png'
+
+    if 'redditstatic.com/icon.png' in preview:
+        preview = ''
+
     return preview
 
 def get_submission_media_preview(submission, header_type, media_type, soup):
@@ -649,11 +672,14 @@ def main():
     except:
         print 'problem connecting to reddit, please check if the website is live. Please try again later'
         return
-    submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='new', limit=1000)
+    # submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='new', limit=1000)
+    submissions = get_submissions(reddit, limit=1000)
     count = 0
     for submission in submissions:
         count += 1
         print '\nArticle number :', count, '\n'
+        #TODO: skip if get_submission_content takes too long
+        # ref ?: http://stackoverflow.com/questions/21965484/timeout-for-python-requests-get-entire-response
         new_article = get_submission_content(submission)
         if new_article:
             database_save(articles, new_article)

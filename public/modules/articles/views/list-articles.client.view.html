@@ -32,20 +32,19 @@
 				<div class="preview-title-container">
 					<a href="{{article.url}}" 
 					   target="_blank" 
-					   data-ng-class="{'preview-title-more': article.showSummary, 'preview-title-less': !article.showSummary}">
+					   class="preview-title">
 						<span class="list-group-item-heading preview-title"
 							  data-ng-class="{'preview-title-more': article.showSummary, 'preview-title-less': !article.showSummary}"
-							  data-ng-bind="article.title"
-							  data-easy-preview
-							  data-more="article.showSummary">
+							  data-ng-bind="article.title">
 						</span>
 					</a>
 				</div>
 
-				<div class="preview-picture" data-ng-show="!article.showVideo">
+
+				<div class="preview-picture" data-ng-hide="article.showVideo && !!article.video_preview">
 					<a data-ng-href="{{article.url}}" 
 					   target="_blank" 
-					   data-ng-class="{'show-less': !article.showVideo}"
+					   data-ng-class="{'show-less': !article.showVideo && !!article.video_preview, 'show-more': !!article.video_preview}"
 					   data-easy-preview
 					   data-more="article.showVideo">
 						<img data-ng-src="{{article.picture_preview}}"/>
@@ -56,36 +55,34 @@
 					
 				</div>
 
-<!-- 
-				<div class="preview-video" data-ng-if="article.showVideo">
-					<object data-ng-attr-data="{{article.video_preview}}"></object>
-				</div> -->
-
-
 				<hover-media article="article" 
 							 data-ng-show="article.showVideo" 
 							 class="preview-video">
 				</hover-media>
 
 
-
-				<!-- <div data-ng-if="!!article.video_preview" class="preview-video"> -->
-			<!-- 		http://beerpla.net/2010/01/12/are-your-youtube-video-embeds-missing-the-full-screen-button-here-is-how-to-fix-it/
-					http://stackoverflow.com/questions/14903112/angularjs-expression-in-html-object-tag -->
-					<!-- or just use iframe..?? -->
-					<!-- <object data-ng-attr-data="{{article.video_preview}}">
-					</object> -->
-
 				<!-- </div> -->
 
 				<!-- TODO: sanitize input ref: https://docs.angularjs.org/api/ng/service/$sce -->
-				<div class="preview-text"
+				<!-- <div class="preview-text"
 					 data-ng-class="{'show-less': !article.showSummary, 'show-more': article.showSummary}"
 					 data-ng-bind="article.description_preview" 
 					 data-ng-show="(!article.summary_preview && !article.self_post_preview) || !article.showSummary"
 					 data-easy-preview
 					 data-more="article.showSummary">
+				</div> -->
+
+
+				<div class="preview-text"
+					 data-ng-class="{'show-less': !article.showSummary, 'show-more': article.showSummary}"
+					 
+					 data-ng-show="(!article.summary_preview && !article.self_post_preview) || !article.showSummary"
+					 data-easy-preview
+					 data-more="article.showSummary">
+					 <span data-ng-bind="article.description_preview" ></span>
 				</div>
+
+
 				<div class="preview-text" 
 					 data-ng-bind="article.summary_preview" 
 					 data-ng-show="!!article.summary_preview && article.showSummary">

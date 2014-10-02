@@ -66,20 +66,15 @@ span.preview-title {
     font-weight: 100;
 }
 
-.preview-title-more:hover {
+.preview-title:hover {
     text-decoration: underline;
     color: white !important;
-}
-
-.preview-title-less:hover {
-    text-decoration: none;
-    cursor: progress; 
 }
 
 
 .preview-picture img {
     max-width: 100%;
-    max-height: 40%;
+    max-height: 33%;
 }
 
 .preview-picture {
