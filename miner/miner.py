@@ -34,6 +34,8 @@ PASSWORD = '****'
 
 
 
+
+
 def database_connect():
     client = MongoClient('mongodb://localhost/alienknows-dev')
     db = client['alienknows-dev']
@@ -596,10 +598,11 @@ def get_page_video(url, soup):
     elif get_domain(url) == 'gfycat':
         video_url = gfycat_video(url)
     else:
-        video_url = get_preview_video(soup)
-    if is_content_type(video_url, VIDEO_HEADERS):
-        return video_url
-    return ''
+        video_url_temp = get_preview_video(soup)
+        #check validity of video url
+        if is_content_type(video_url_temp, VIDEO_HEADERS):
+            video_url = video_url_temp
+    return video_url
 
 def liveleak_video(soup):
     embed_url = 'http://www.liveleak.com/ll_embed?f='

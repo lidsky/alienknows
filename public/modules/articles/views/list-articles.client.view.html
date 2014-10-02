@@ -42,7 +42,7 @@
 					</a>
 				</div>
 
-				<div class="preview-picture" data-ng-if="!article.showVideo && !article.showVideo">
+				<div class="preview-picture" data-ng-show="!article.showVideo">
 					<a data-ng-href="{{article.url}}" 
 					   target="_blank" 
 					   data-ng-class="{'show-less': !article.showVideo}"
@@ -53,7 +53,6 @@
 					<i data-ng-class="{'play-vid-icon': !!article.video_preview}"
 					   data-easy-preview 
 					   data-more="article.showVideo"></i>
-
 					
 				</div>
 

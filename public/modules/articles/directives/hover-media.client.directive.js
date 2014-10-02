@@ -51,7 +51,8 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 			}			
 		};
 
-
+		// ref 1: http://stackoverflow.com/questions/23065165/angularjs-directive-dynamic-templates
+		// ref 2: http://onehungrymind.com/angularjs-dynamic-templates/ 
 		var getTemplate = function(video, picture) {
 			if (!!video) {
 				if (video.substring(video.length - 4) === '.mp4') {

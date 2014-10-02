@@ -78,7 +78,7 @@ angular.module('articles').controller('ArticlesController', ['$scope', '$statePa
 								article.video_preview.indexOf('vimeo') === -1 && 
 								article.video_preview.indexOf('liveleak') === -1 &&
 								article.video_preview.indexOf('vid.me') === -1) {
-							// article.video_preview = article.video_preview.replace('&autoplay=true&autoplay=1&autostart=true&autostart=1','');
+						// if ($scope.articleList.indexOf(article) === -1) {
 							if (!!article.video_preview && !article.picture_preview) {
 								article.picture_preview = 'http://i.imgur.com/shZlsma.png';
 							}
