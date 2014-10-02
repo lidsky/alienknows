@@ -49,16 +49,19 @@
 					   data-easy-preview
 					   data-more="article.showVideo">
 						<img data-ng-src="{{article.picture_preview}}"/>
-						<i data-ng-class="{'play-vid-icon': !!article.video_preview}"></i>
 					</a>
+					<i data-ng-class="{'play-vid-icon': !!article.video_preview}"
+					   data-easy-preview 
+					   data-more="article.showVideo"></i>
+
 					
 				</div>
 
 <!-- 
 				<div class="preview-video" data-ng-if="article.showVideo">
 					<object data-ng-attr-data="{{article.video_preview}}"></object>
-				</div>
- -->
+				</div> -->
+
 
 				<hover-media article="article" 
 							 data-ng-show="article.showVideo" 

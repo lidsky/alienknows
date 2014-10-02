@@ -86,6 +86,7 @@ span.preview-title {
     text-align: center;
     width: 100%;
     margin: auto;
+    position: relative;
 }
 
 .play-vid-icon {

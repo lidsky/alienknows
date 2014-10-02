@@ -7,21 +7,16 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 					1. check format .sfw .mp4
 					2. contains '?'
 
-
-					PURE PROBLEM:
-					1. funnyordie
-
 					Don't append:
 					1. hulu
 
 					Rules:
 
-					1. endswith .mp4, videos
+					1. endswith .mp4, videos tag
 
 			        <video  width="500" height="283" autoplay controls>     
 		                <source src="http://content_us.fashiontube.com/103/ce41eaf4-6c5b-4402-bf47-3da69dfeb5c2/640x.mp4" type="video/mp4">
 		            </video> 
-
 
 
 					2.skip:
@@ -61,10 +56,9 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 			if (!!video) {
 				if (video.substring(video.length - 4) === '.mp4') {
 					console.log('in mp4 for url vid', video);
-					return '<video controls autoplay><source data-ng-src="{{article.picture_preview}}" type="video/mp4"></video>';
+					return '<video controls autoplay><source data-ng-src="{{article.video_preview}}" type="video/mp4"></video>';
 				} else {
-					// append or not append autoplay
-					return '<object data="{{article.video_preview}}"></object>';
+					return '<object data-ng-attr-data="{{article.video_preview}}"></object>';
 				}
 			} else {
 				return '';

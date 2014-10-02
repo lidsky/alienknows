@@ -21,15 +21,6 @@ from pymongo import MongoClient
 
 
 '''
-- video/gif
-    todo:
-    - autoplay video 
-    (ref youtube: http://stackoverflow.com/questions/20706799/start-youtube-video-on-hover-mouseover
-     ref vimeo: http://stackoverflow.com/questions/8124963/play-vimeo-video-onmouseover-and-pause-onmouseout )
-    - autoplay gif
-    (ref: http://stackoverflow.com/questions/20644209/play-gif-on-mouseover-and-pause-gif-on-mouse-out-without-replacing-images-solv
-     ref: http://stackoverflow.com/questions/4904940/python-converting-gif-frames-to-png)
-
 todo:
 comments-preview
 content-page (full preview and comments)
@@ -40,7 +31,6 @@ REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
 REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1)'
 USERNAME = 'plz_hire_me_reddit'
 PASSWORD = '****'
-
 
 
 
@@ -160,9 +150,9 @@ def get_submission_content(submission):
             soup = soupify_page(html_text=response.text)
         if soup:
 
-            # domain = get_domain(submission.url)
-            # if 'youtu' in domain or 'vimeo' in domain or 'dailymotion' in domain:
-            #     return {}
+            domain = get_domain(submission.url)
+            if 'youtu' in domain or 'vimeo' in domain or 'dailymotion' in domain:
+                return {}
 
             submission_data = {}
             domain_title, domain_description = get_domain_data(submission.url)
@@ -226,8 +216,6 @@ def get_page_title(soup, domain_title):
         if title != domain_title:
             return title
     return ''
-
-
 
 def is_wikipedia(submission):
     return 'wikipedia.org' in submission.domain
@@ -488,6 +476,8 @@ def get_submission_summary_preview(submission, target_test, title, response):
 
 
 def get_preview_video(soup):
+    #TODO: find using property="twitter:player:url" and "twitter:player:stream:url" 
+    # (ref: view-source:https://www.kickstarter.com/projects/1087256999/odiun-a-web-site)
     if soup:
         og_vids = get_og_property(soup, 'video', deep=True)
         for og_vid in og_vids:
@@ -495,7 +485,7 @@ def get_preview_video(soup):
                 return og_vid
         if len(og_vids) > 0:
             return og_vids[0]
-        tw_vid = get_twitter_property(soup, 'player')
+        tw_vid = get_twitter_property(soup, 'player') 
         if tw_vid:
             return tw_vid
         og_vid_url = get_og_property(soup, 'video:url')
@@ -541,7 +531,7 @@ def get_wikipedia_image(soup):
 
 def get_body_page_image(soup):
     #img alt, or use iamge url path 
-    pass
+    return ''
 
 
 def url_content_type(url='', response_obj=''):
@@ -559,67 +549,14 @@ def is_content_type(url, header_list):
             return True
     return False
 
-#TODO: rather than skipping them altogether, maybe a click to expand abnd show the player
-SKIP_VIDEO_AUTOPLAY = ['flowplayer', 'brightcove.com', 'BloombergPlayer.swf']
+
+VIDEO_HEADERS = ['video', 'application/x-shockwave-flash']
 def get_submission_video_preview(submission, soup):
-    #TODO: some video autoplays?? wtf??? 
-    #example: http://www.telegraph.co.uk/news/uknews/scottish-independence/11092392/Do-the-Scots-really-want-to-stop-running-Britain.html
-    #sol modify src url (add '&autoplay=0&autoplay=false'): 
-    #http://www.therightplanet.com/2013/12/blogging-tip-how-to-turn-those-doggone-autoplay-videos-off/ 
-    #prob: https://v.cdn.vine.co/r/videos/082685C68F1122617932342812672_220895658d0.5.1.10840199946545656233.mp4?versionId=BKp4O3wVv_a.pNePglWRwiSof_C1cbUp
-    #TODO: deal with twitch.tv example: http://www.twitch.tv/ichalvl
-    preview = ''
-    video_headers = ['video', 'application/x-shockwave-flash']
-    preview = get_submission_media_preview(submission, video_headers, 'video', soup)
-    if preview:
-
-        # for player in SKIP_VIDEO_AUTOPLAY:
-        #     if player in preview:
-        #         return ''
-
-        #this wont work for "http://gfycat.com/InnocentEnragedBushbaby"
-        # &autoplay=true&autoplay=1&autostart=true&autostart=1
-        # preview += '&autoplay=0&autoplay=false&autostart=false&autostart=0'
-        # preview += '&autoplay=true&autoPlay=true&autostart=true&autoStart=true'
-
-        '''
-        problem appending:
-        1. instagram: http://instagram.com/p/sqkzo4HeOO/
-        2. gfycat: http://gfycat.com/InnocentEnragedBushbaby
-        3. .swf extension: http://media.mtvnservices.com/fb/mgid:arc:video:comedycentral.com:2a50884a-ed01-11e0-aca6-0026b9414f30.swf
-        4. .mp4 extension: http://content_us.fashiontube.com/103/ce41eaf4-6c5b-4402-bf47-3da69dfeb5c2/640x.mp4 --- iframe
-
-        problem in general:
-        1. cnn: http://www.cnn.com/video/data/2.0/video/bestoftv/2014/09/23/morning-minute-9-23-14.cnn.html
-
-
-        No problem:
-        1. youtube
-        2. vimeo
-        3. dailymotion
-        4. vid.me
-
-
-        SOLVED PARSING:
-        1. liveleak
-        2. gyfcat (.mp4 ending)
-
-
-
-        SOLUTION:
-
-        1) .mp4
-
-            <video  width="500" height="283" autoplay controls>     
-                <source src="http://content_us.fashiontube.com/103/ce41eaf4-6c5b-4402-bf47-3da69dfeb5c2/640x.mp4" type="video/mp4">
-            </video> 
-
-
-        '''
-
-
+    preview = ''  
+    preview = get_submission_media_preview(submission, VIDEO_HEADERS, 'video', soup)
     return preview
 
+PICTURE_HEADERS = ['image']
 def get_submission_picture_preview(submission, soup):
     #if self post reddit, find image in the self text
     #find in website <img> tags with relevent alt attribute or img url
@@ -627,8 +564,7 @@ def get_submission_picture_preview(submission, soup):
     #oh nyt too: http://opinionator.blogs.nytimes.com/2014/02/08/how-single-motherhood-hurts-kids/?smid=re-share
     #DEBUG: http://www.reddit.com/r/soccer/comments/2gjm6q/carlo_ancelotti_and_chicharito_before_the_mexican/
     preview = ''
-    picture_headers = ['image']
-    preview = get_submission_media_preview(submission, picture_headers, 'picture', soup)
+    preview = get_submission_media_preview(submission, PICTURE_HEADERS, 'picture', soup)
     if not preview:
         if is_wikipedia(submission):
             preview = get_wikipedia_image(soup)
@@ -656,13 +592,14 @@ def get_submission_media_preview(submission, header_type, media_type, soup):
 def get_page_video(url, soup):
     video_url = ''
     if get_domain(url) == 'liveleak':
-        return liveleak_video(soup)
+        video_url = liveleak_video(soup)
     elif get_domain(url) == 'gfycat':
-        return gfycat_video(url)
+        video_url = gfycat_video(url)
     else:
-        #TODO: check if video preview link is valid
-        # non valid: http://bangordailynews.com/video/two-headed-snapping-turtle-found-in-hudson/
-        return get_preview_video(soup)
+        video_url = get_preview_video(soup)
+    if is_content_type(video_url, VIDEO_HEADERS):
+        return video_url
+    return ''
 
 def liveleak_video(soup):
     embed_url = 'http://www.liveleak.com/ll_embed?f='
@@ -709,8 +646,11 @@ def main():
     except:
         print 'problem connecting to reddit, please check if the website is live. Please try again later'
         return
-    submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='new', limit=10000)
+    submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='new', limit=1000)
+    count = 0
     for submission in submissions:
+        count += 1
+        print '\nArticle number :', count, '\n'
         new_article = get_submission_content(submission)
         if new_article:
             database_save(articles, new_article)
