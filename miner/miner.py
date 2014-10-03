@@ -21,6 +21,11 @@ from pymongo import MongoClient
 
 
 '''
+gif preview (show 1st frame):
+1. https://gist.github.com/BigglesZX/4016539#file-gifextract-py-L68
+2. http://stackoverflow.com/questions/1412529/how-do-i-programmatically-check-whether-a-gif-image-is-animated
+
+
 todo:
 comments-preview
 content-page (full preview and comments)
@@ -223,8 +228,11 @@ def get_preview_selftext(submission):
     #TODO: summarize/shorten the content if it's too long
     if not submission.selftext:
         return ''
-    decode_html = HTMLParser.HTMLParser()
-    return decode_html.unescape(submission.selftext_html)
+    raw_html = unescape_html(submission.selftext_html)
+    soup = soupify_page(html_text=raw_html)
+    soup = insert_target_blank(soup)
+    soup = relative_to_absolute_soup(soup, 'http://www.reddit.com/')
+    return str(soup)
 
 def get_utc_now():
     now = datetime.datetime.utcnow()
@@ -236,6 +244,26 @@ def get_page_title(soup, domain_title):
         if title != domain_title:
             return title
     return ''
+
+def insert_target_blank(soup):
+    if soup:
+        for tag in soup.find_all('a'):
+            tag['target'] = '_blank'
+    return soup
+
+
+def relative_to_absolute_soup(soup, domain_url):
+    if soup:
+        for tag in soup.find_all('a'):
+            if 'href' in tag.attrs:
+                tag.attrs['href'] = relative_to_absolute(tag.attrs['href'], domain_url)
+    return soup
+
+
+def unescape_html(html_text):
+    decode_html = HTMLParser.HTMLParser()
+    return decode_html.unescape(html_text)
+
 
 def is_wikipedia(submission):
     return 'wikipedia.org' in submission.domain
@@ -614,6 +642,8 @@ def relative_to_absolute(target_url, domain_url):
                 target_url = 'http:' + target_url
             elif target_url.startswith('/'):
                 target_url = 'http://' + get_full_domain(domain_url) + target_url
+            else:
+                target_url = 'http://' + target_url
     return target_url
 
 def is_valid_picture(url):
@@ -759,7 +789,7 @@ def main():
     # submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='top', limit=1000)
     # submissions = get_submissions(reddit, subreddit='spacex+teslamotors+elonmusk+news+worldnews+wikipedia+startup', sorting_type='new', limit=1000)
     # submissions = get_submissions(reddit, subreddit='news+worldnews+wikipedia', sorting_type='new', limit=1000)
-    submissions = get_submissions(reddit, limit=1000)
+    submissions = get_submissions(reddit, limit=300)
     count = 0
     for submission in submissions:
         count += 1

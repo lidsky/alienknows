@@ -54,7 +54,7 @@ div.preview-block:hover {
 span.preview-title {
     color: rgb(185, 185, 185) !important;
     letter-spacing: 1px;
-    font-size: 25px;
+    font-size: 23px;
     font-weight: 100;
 }
 
@@ -71,8 +71,8 @@ img.preview-picture {
 }
 
 img.small-picture {
-    max-width: 40%;
-    max-height: 40%;    
+    max-width: 35%;
+    max-height: 35%;    
 }
 
 .preview-picture {
