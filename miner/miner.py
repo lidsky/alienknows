@@ -27,12 +27,15 @@ content-page (full preview and comments)
 
 '''
 
-REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
-REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1)'
+# REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
+# REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1)'
+# USERNAME = 'plz_hire_me_reddit'
+# PASSWORD = '****'
+
+REQUEST_HEADER = { 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)' }
+REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1808@gmail.com)'
 USERNAME = 'plz_hire_me_reddit'
-PASSWORD = '****'
-
-
+PASSWORD = 'alienknows89'
 
 
 
@@ -145,6 +148,7 @@ def get_submission_content(submission):
         article['value'] = get_submission_value(submission)
         article['comment_number'] = get_submission_comment_number(submission)
     else:
+        print 'processing submission.id', submission.id
         response = ''
         soup = ''
         print 'opening page'

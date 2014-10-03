@@ -44,11 +44,12 @@
 				<div class="preview-picture" data-ng-hide="article.showVideo && !!article.video_preview">
 					<a data-ng-href="{{article.url}}" 
 					   target="_blank" 
-					   data-ng-class="{'show-less': !article.showVideo && !!article.video_preview, 'show-more': !!article.video_preview}"
 					   data-easy-preview
 					   data-delay="100"
 					   data-more="article.showVideo">
-						<img data-ng-src="{{article.picture_preview}}"/>
+						<img data-ng-src="{{article.picture_preview}}"
+							 class="preview-picture"
+							 data-ng-class="{'small-picture': !article.showVideo && !article.video_preview}"/>
 					</a>
 					<i data-ng-class="{'play-vid-icon': !!article.video_preview}"
 					   data-easy-preview 
@@ -66,7 +67,6 @@
 
 				<!-- TODO: sanitize input ref: https://docs.angularjs.org/api/ng/service/$sce -->
 				<!-- <div class="preview-text"
-					 data-ng-class="{'show-less': !article.showSummary, 'show-more': article.showSummary}"
 					 data-ng-bind="article.description_preview" 
 					 data-ng-show="(!article.summary_preview && !article.self_post_preview) || !article.showSummary"
 					 data-easy-preview
@@ -75,8 +75,6 @@
 
 
 				<div class="preview-text"
-					 data-ng-class="{'show-less': !article.showSummary, 'show-more': article.showSummary}"
-					 
 					 data-ng-show="(!article.summary_preview && !article.self_post_preview) || !article.showSummary"
 					 data-easy-preview
 					 data-more="article.showSummary">
