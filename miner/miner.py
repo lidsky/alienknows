@@ -34,6 +34,8 @@ PASSWORD = '****'
 
 
 
+
+
 def database_connect():
     client = MongoClient('mongodb://localhost/alienknows-dev')
     db = client['alienknows-dev']
@@ -150,9 +152,10 @@ def get_submission_content(submission):
         if response:
             print 'soupifying page'
 
-            #if type is not text, will stuck at response.text 
-            if 'text/html' in response.headers['content-type']:
-                soup = soupify_page(html_text=response.text)
+            #if type is not text, will stuck at response.text
+            if 'content-type' in response.headers:
+                if 'text/html' in response.headers['content-type']:
+                    soup = soupify_page(html_text=response.text)
         # if soup:
 
         submission_data = {}
@@ -485,6 +488,10 @@ def get_submission_description_preview(submission, soup, title, domain_descripti
         #TODO:if self post with no selftext, stats on comments will be the default comment. change or check for this mkay... 
         #DEBUG: http://www.reddit.com/r/Showerthoughts/comments/2gijsn/if_we_pop_bubble_wrap_made_in_china_the_air_that/
         preview = get_preview_description(submission, soup, title, domain_description)
+
+    if preview.endswith('comments so far on reddit'):
+        preview = '' 
+
     return preview
 
 
@@ -672,7 +679,8 @@ def main():
     except:
         print 'problem connecting to reddit, please check if the website is live. Please try again later'
         return
-    # submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='new', limit=1000)
+    # submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='top', limit=1000)
+    # submissions = get_submissions(reddit, subreddit='spacex+teslamotors+elonmusk+news+worldnews+wikipedia+startup', sorting_type='new', limit=1000)
     submissions = get_submissions(reddit, limit=1000)
     count = 0
     for submission in submissions:

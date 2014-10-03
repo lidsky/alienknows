@@ -8,30 +8,34 @@ angular.module('articles').directive('easyPreview', ['$timeout',
 			// replace:true,
 			transclude: true,
 			scope: {
-				more: '='
+				more: '=',
+				delay: '='
 			},
 			link: function (scope, element, attrs) {
 				// element.text('this is the easyPreview directive');
+				var delay = scope.delay || 200;
 
+				
+				element.bind('mouseover', function(){
+					if (!scope.more) {
+						element.css('cursor','progress');
+					}
+					var timeoutId = $timeout(function(){
+						scope.$apply(function(){
+							element.css('cursor','default');
+							scope.more = true;
 
-				if (!scope.more) {
-					element.bind('mouseover', function(){
-						var timeoutId = $timeout(function(){
-							scope.$apply(function(){
-								console.log('in directive easyPreview, scope more BEFORE: ', scope.more);
-								scope.more = true;
-								console.log('in directive easyPreview, scope more AFTER: ', scope.more);
-
-							});
-						}, 200);
-
-						element.bind('mouseout', function(){
-							$timeout.cancel(timeoutId);
 						});
+					}, delay);
 
-
+					element.bind('mouseout', function(){
+						$timeout.cancel(timeoutId);
+						element.css('cursor','default');
 					});
-				}
+
+
+				});
+				
 
 
 			}

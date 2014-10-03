@@ -68,7 +68,7 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 
 
 		return {
-			template: '<div></div>',
+			// template: '<div></div>',
 			restrict: 'E',
 			scope: {
 				article: '='
