@@ -40,7 +40,6 @@ PASSWORD = '****'
 
 
 
-
 def database_connect():
     client = MongoClient('mongodb://localhost/alienknows-dev')
     db = client['alienknows-dev']
@@ -230,8 +229,7 @@ def get_preview_selftext(submission):
         return ''
     raw_html = unescape_html(submission.selftext_html)
     soup = soupify_page(html_text=raw_html)
-    soup = insert_target_blank(soup)
-    soup = relative_to_absolute_soup(soup, 'http://www.reddit.com/')
+    soup = normalize_html_text(soup, 'http://www.reddit.com/')
     return str(soup)
 
 def get_utc_now():
@@ -257,6 +255,12 @@ def relative_to_absolute_soup(soup, domain_url):
         for tag in soup.find_all('a'):
             if 'href' in tag.attrs:
                 tag.attrs['href'] = relative_to_absolute(tag.attrs['href'], domain_url)
+    return soup
+
+def normalize_html_text(soup, domain_url):
+    if soup and domain_url:
+        soup = insert_target_blank(soup)
+        soup = relative_to_absolute_soup(soup, domain_url)
     return soup
 
 
@@ -347,7 +351,7 @@ def open_page(url, text=False):
     return ''
 
 
-def soupify_page(url='', html_text=''):
+def soupify_page(html_text='', url=''):
     if url and not html_text:
         html_text = open_page(url, text=True)
     try:
@@ -710,6 +714,7 @@ def get_submission_picture_preview(submission, soup, video_preview):
     # http://www.newindianexpress.com/states/tamil_nadu/5700-Schools-in-TN-Lack-Toilets-Survey/2014/09/28/article2453019.ece
     # http://arstechnica.com/tech-policy/2014/10/its-now-legal-to-make-backups-of-movies-music-and-e-books-in-the-uk/
     # http://rbth.com/news/2014/10/01/russia_cancels_participation_in_us_education_program_after_russian_stude_40284.html
+    # http://www.huffingtonpost.com/jen-caltrider/hello-america-its-me-colorado_b_5870476.html?utm_hp_ref=denver&amp;ir=Denver
 
     return preview
 
@@ -774,9 +779,27 @@ def gfycat_video(url):
                 return json_response['gfyItem']['mp4Url']
     return ''
 
+def soup_to_string(soup):
+    if soup:
+        return str(soup)
+    return ''
+
 
 def get_submission_comment_preview(submission):
-    return ''
+    raw_comments = [{'comment_html': comment.body_html, 'score': comment.score} 
+                    for comment in submission.comments if hasattr(comment,'score') and comment.score > 0 ]
+    sorted_raw_comments = sorted(raw_comments, key=lambda x:x['score'], reverse=True)[: min(len(raw_comments), 5)]
+    comment_html = [comment['comment_html'] for comment in sorted_raw_comments]
+    soup_list = map_multiple([unescape_html, soupify_page, insert_target_blank], comment_html)
+    for soup in soup_list:
+        soup = relative_to_absolute_soup(soup, 'http://www.reddit.com')
+    return map(soup_to_string, soup_list)
+
+
+def map_multiple(input_functions, input_list):
+    for input_function in input_functions:
+        input_list = map(input_function, input_list)
+    return input_list
 
 
 def main():
@@ -789,6 +812,7 @@ def main():
     # submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='top', limit=1000)
     # submissions = get_submissions(reddit, subreddit='spacex+teslamotors+elonmusk+news+worldnews+wikipedia+startup', sorting_type='new', limit=1000)
     # submissions = get_submissions(reddit, subreddit='news+worldnews+wikipedia', sorting_type='new', limit=1000)
+    # submissions = get_submissions(reddit, subreddit='trendingsubreddits', sorting_type='hot', limit=100)
     submissions = get_submissions(reddit, limit=300)
     count = 0
     for submission in submissions:
