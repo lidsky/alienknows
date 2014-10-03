@@ -447,6 +447,9 @@ def get_submission_self_post_preview(submission):
 def get_domain(url):
     return tldextract.extract(url).domain
 
+def get_full_domain(url):
+    return '.'.join(tldextract.extract(url))
+
 def get_subdomain(url):
     parsed_uri = urlparse(url)
     return parsed_uri.scheme + '://' + parsed_uri.netloc + '/'
@@ -555,7 +558,37 @@ def get_wikipedia_image(soup):
 
 
 def get_body_page_image(soup):
-    #img alt, or use iamge url path 
+    #img alt or img title (maybe data-mediaviewer-caption? ref: http://www.nytimes.com/2014/10/03/world/middleeast/un-reports-at-least-26000-civilian-casualties-in-iraq-conflict-this-year.html), 
+    # or use iamge url path
+    #list of examples:
+    # http://www.theguardian.com/world/2014/oct/02/judge-obama-guantanamo-force-feeding-hearing-secret
+    # http://www.theguardian.com/science/2014/oct/03/hiv-virus-baby-drug-treatment-anti-retroviral-infection
+    # http://www.theguardian.com/uk-news/2014/oct/02/gerry-mccann-madeleine-sunday-times-libel-payout
+    # http://9janews2.blogspot.nl/2014/10/swiss-helicopter-crash-in-france-leaves.html
+    # http://www.theguardian.com/world/2014/oct/02/russian-investors-north-korea-boost-business
+    # http://bigstory.ap.org/article/96e12e16d42c43f08ac01ea48e1238a9/california-teens-arrested-920-chicken-deaths
+    # http://bigstory.ap.org/article/034ca44ad33f4c888fa1b26988ce76cf/jpmorgan-says-data-breach-affected-76m-households
+    # http://www.theguardian.com/science/2014/oct/02/hiv-aids-pandemic-kinshasa-africa
+    # http://www.bbc.com/news/world-asia-india-29441052
+    # http://www.theguardian.com/environment/2014/oct/02/uk-nuclear-bomb-factories-rapped-by-watchdogs-over-radioactive-waste
+    # http://www.bbc.com/news/world-middle-east-29455204
+    # http://www.theguardian.com/world/2014/oct/02/hong-kong-protesters-deadline-police
+    # http://www.msn.com/en-us/news/us/thirst-turns-to-desperation-in-rural-california/ar-BB73j6n
+    # http://www.navy.mil/submit/display.asp?story_id=83646
+    # http://www.theguardian.com/world/2014/oct/02/la-fashion-district-raid-cartel-rules-money-laundering
+    # http://www.bbc.com/news/world-europe-29455550
+    # http://www.msn.com/en-us/news/crime/california-teens-arrested-in-920-chicken-deaths/ar-BB70GBn
+    # https://nakedsecurity.sophos.com/2014/10/02/us-attorney-general-urges-tech-companies-to-leave-back-doors-open-on-gadgets-for-police/
+    # https://time.com/3455815/hawaii-potential-ebola-case/
+    # http://www.newsweek.com/north-korea-prepares-launch-site-longer-range-rockets-report-274771
+    # http://news.sky.com/story/1346233/japan-braces-for-300-mile-wide-typhoon
+    # https://news.yahoo.com/us-could-topple-government-kill-argentinas-kirchner-095518100.html
+    # http://www.georgianewsday.com/news/crime/292479-grandmother-geneva-robinson-accused-of-dressing-as-witch-to-abuse-child.html
+    # http://news.sky.com/story/1346023/raf-tornados-take-out-is-truck-using-guided-bomb
+
+
+
+
     return ''
 
 
@@ -574,6 +607,18 @@ def is_content_type(url, header_list):
             return True
     return False
 
+def relative_to_absolute(target_url, domain_url):
+    if target_url:
+        if 'http' not in target_url:
+            if target_url.startswith('//'):
+                target_url = 'http:' + target_url
+            elif target_url.startswith('/'):
+                target_url = 'http://' + get_full_domain(domain_url) + target_url
+    return target_url
+
+def is_valid_picture(url):
+    return is_content_type(url, PICTURE_HEADERS)
+
 
 VIDEO_HEADERS = ['video', 'application/x-shockwave-flash']
 def get_submission_video_preview(submission, soup):
@@ -585,7 +630,7 @@ PICTURE_HEADERS = ['image']
 def get_submission_picture_preview(submission, soup, video_preview):
     #if self post reddit, find image in the self text
     #find in website <img> tags with relevent alt attribute or img url
-    #BBC og:image is a fucking joke, demo: http://www.bbc.com/news/world-middle-east-29186506 , 
+    #BBC og:image is a fucking joke, example: http://www.bbc.com/news/world-middle-east-29186506 , 
     #oh nyt too: http://opinionator.blogs.nytimes.com/2014/02/08/how-single-motherhood-hurts-kids/?smid=re-share
     #DEBUG: http://www.reddit.com/r/soccer/comments/2gjm6q/carlo_ancelotti_and_chicharito_before_the_mexican/
     preview = ''
@@ -596,10 +641,7 @@ def get_submission_picture_preview(submission, soup, video_preview):
         else:
             preview = get_body_page_image(soup)
 
-    #TODO: check for relative urls (url without domain '/', url withput protocol '//')
-    # if preview:
-    #     if 'http' not in preview: 
-    #         preview = 'http://' + submission.domain + preview
+    preview = relative_to_absolute(preview, submission.url)
 
     #generic video thumbnail
     if video_preview and not preview:
@@ -607,6 +649,37 @@ def get_submission_picture_preview(submission, soup, video_preview):
 
     if 'redditstatic.com/icon.png' in preview:
         preview = ''
+
+    if not is_valid_picture(preview):
+        if preview:
+            print '\n\n\nNOTTTTTTTTTTTT VALIDDDD PIC  URLLLLLLLLL: ', preview
+            print 'offending url: ', submission.url,'\n\n\n\n'
+        preview = ''
+
+
+    #TODO: reject default logo, examples
+    # http://www.nytimes.com/2014/10/02/us/possible-leak-by-ferguson-grand-juror-is-investigated.html
+    # http://news.yahoo.com/why-did-americas-oldest-episcopal-seminary-fire-most-211954728.html
+    # http://www.theguardian.com/world/2014/oct/02/florida-speed-trap-town-disbands-police-force
+    # http://www.miamiherald.com/news/nation-world/article2484484.html
+    # http://www.washingtonpost.com/world/middle_east/us-marine-presumed-lost-in-the-persian-gulf/2014/10/02/33d1814e-4a6e-11e4-a4bf-794ab74e90f0_story.html
+    # http://www.meadvilletribune.com/news/article_05d210c2-49a8-11e4-8658-5b91a80b60be.html
+    # http://www.bbc.com/news/world-middle-east-29455204
+    # http://www.kcra.com/money/fox-news-site-removes-incendiary-interview-about-oklahoma-mosque/28373308
+    # http://www.foxnews.com/politics/2014/10/01/court-obama-administration-cant-hide-investigation-into-former-white-house/
+    # http://www.law360.com/articles/583257/fcc-chair-calls-city-broadband-as-american-as-you-can-get
+    # http://www.nytimes.com/2014/10/03/world/asia/satellite-shows-north-korea-has-upgraded-launch-station.html?_r=0
+    # http://seattletimes.com/html/nationworld/2024685420_apxjpmorgandatabreach.html
+    # http://www.timesnews.net/article/9081271/gate-city-students-file-lawsuit-against-assistant-principal
+    # http://www.ft.com/cms/s/d8938ffc-4a04-11e4-8de3-00144feab7de,Authorised=false.html
+    # http://www.buffalonews.com/city-region/environment/new-federal-rule-allows-freighters-to-dump-cargo-remnants-into-great-lakes-20140930
+    # http://www.chicagotribune.com/sns-wp-blm-news-bc-australia01-20141001-story.html
+    # http://www.al.com/news/index.ssf/2014/10/second_patient_being_monitored.html
+    # http://www.sfgate.com/business/energy/article/Feds-to-unveil-cleanup-plan-for-nuke-waste-dump-5790898.php
+    # http://www.startribune.com/local/277846091.html
+    # http://www.newindianexpress.com/states/tamil_nadu/5700-Schools-in-TN-Lack-Toilets-Survey/2014/09/28/article2453019.ece
+    # http://arstechnica.com/tech-policy/2014/10/its-now-legal-to-make-backups-of-movies-music-and-e-books-in-the-uk/
+    # http://rbth.com/news/2014/10/01/russia_cancels_participation_in_us_education_program_after_russian_stude_40284.html
 
     return preview
 
@@ -631,9 +704,12 @@ def get_page_video(url, soup):
     else:
         video_url_temp = get_preview_video(soup)
         #check validity of video url
-        if is_content_type(video_url_temp, VIDEO_HEADERS):
+        if is_valid_video(video_url_temp):
             video_url = video_url_temp
     return video_url
+
+def is_valid_video(url):
+    return is_content_type(url, VIDEO_HEADERS)
 
 def liveleak_video(soup):
     embed_url = 'http://www.liveleak.com/ll_embed?f='
@@ -682,6 +758,7 @@ def main():
         return
     # submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='top', limit=1000)
     # submissions = get_submissions(reddit, subreddit='spacex+teslamotors+elonmusk+news+worldnews+wikipedia+startup', sorting_type='new', limit=1000)
+    # submissions = get_submissions(reddit, subreddit='news+worldnews+wikipedia', sorting_type='new', limit=1000)
     submissions = get_submissions(reddit, limit=1000)
     count = 0
     for submission in submissions:
