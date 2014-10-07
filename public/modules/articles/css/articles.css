@@ -3,6 +3,17 @@ h1, h2, h3, h4 {
     font-weight: 100;
 }
 
+
+a {
+    color: rgb(200, 200, 200);
+    text-decoration: underline;
+}
+
+a:hover {
+    transition: all 0.5s ease;
+    color: rgb(220, 220, 220);
+}
+
 .page-header {
     border-bottom: 0;
     color: white;
@@ -133,10 +144,11 @@ img.large-picture {
 }
 
 .comment-preview {
-    border: solid 1px;
+    border: solid 1px rgb(80, 80, 80);
     border-radius: 5px;
     padding: 5px;
     margin-bottom: 5px;
+    word-wrap: break-word;
 }
 
 .comment-preview p {

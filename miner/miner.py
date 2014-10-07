@@ -789,6 +789,7 @@ def soup_to_string(soup):
 
 def get_submission_comment_preview(submission):
     #TODO: too compact, refactor code/comment
+    #TODO: detect this and exclude it --> '[deleted]'
     raw_comments = [{'comment_html': comment.body_html, 'score': comment.score} 
                     for comment in submission.comments if hasattr(comment,'score') and comment.score > 0 ]
     sorted_raw_comments = sorted(raw_comments, key=lambda x:x['score'], reverse=True)[: min(len(raw_comments), 5)]
@@ -816,7 +817,7 @@ def main():
     # submissions = get_submissions(reddit, subreddit='spacex+teslamotors+elonmusk+news+worldnews+wikipedia+startup', sorting_type='new', limit=1000)
     # submissions = get_submissions(reddit, subreddit='news+worldnews+wikipedia', sorting_type='new', limit=1000)
     # submissions = get_submissions(reddit, subreddit='trendingsubreddits', sorting_type='hot', limit=100)
-    submissions = get_submissions(reddit, limit=5000)
+    submissions = get_submissions(reddit, limit=300)
     count = 0
     for submission in submissions:
         count += 1

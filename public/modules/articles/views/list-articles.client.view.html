@@ -52,7 +52,7 @@
 							 data-ng-class="{'large-picture': article.showVideo || !!article.video_preview}"/>
 					</a>
 					<i data-ng-class="{'play-vid-icon': !!article.video_preview}"
-					   data-easy-preview 
+					   data-easy-preview
 					   data-more="article.showVideo"></i>
 					
 				</div>
@@ -93,7 +93,7 @@
 
 
 				<div class="comment-preview-container preview-text" ng-show="article.showComment">
-					<div data-ng-repeat="comment in article.comment_preview" class="comment-preview">
+					<div data-ng-repeat="comment in article.comment_preview track by $index" class="comment-preview">
 						<span data-ng-bind-html="comment"></span>
 					</div>
 				</div>
@@ -106,7 +106,10 @@
 
 						{{article.value}}
 					</span> -->
-					<a data-ng-href="{{article.comment_url}}" target="_blank" data-easy-preview data-more="article.showComment">
+					<a data-ng-href="{{article.comment_url}}" 
+					   target="_blank" 
+					   data-easy-preview
+					   data-more="article.showComment">
 						<span class="glyphicon glyphicon-comment"></span>
 						<span class="comment-number">{{article.comment_number}}</span>
 					</a>
