@@ -12,7 +12,7 @@
 			<!-- <a data-ng-repeat="article in articles" data-ng-href="#!/articles/{{article._id}}" class="list-group-item"> -->
 			<div data-ng-repeat="article in articleList track by $index"
 			     class="list-group-item preview-block"
-			     data-ng-init="article.showSummary = false; article.showVideo = false">
+			     data-ng-init="article.showSummary = false; article.showVideo = false; article.showComment = false">
 
 		<!-- 		<small class="list-group-item-text">
 					Posted on
@@ -49,7 +49,7 @@
 					   data-more="article.showVideo">
 						<img data-ng-src="{{article.picture_preview}}"
 							 class="preview-picture"
-							 data-ng-class="{'small-picture': !article.showVideo && !article.video_preview}"/>
+							 data-ng-class="{'large-picture': article.showVideo || !!article.video_preview}"/>
 					</a>
 					<i data-ng-class="{'play-vid-icon': !!article.video_preview}"
 					   data-easy-preview 
@@ -92,25 +92,28 @@
 				</div>
 
 
+				<div class="comment-preview-container preview-text" ng-show="article.showComment">
+					<div data-ng-repeat="comment in article.comment_preview">
+						<span data-ng-bind-html="comment"></span>
+					</div>
+				</div>
+
+
 				<div class="preview-value-container comment-number-container" data-ng-show="article.value">
-					<span class="preview-more-text-font">
-						<!-- <span class="social-currency">zł </span> -->
+					<!-- <span class="preview-more-text-font">
+						<span class="social-currency">zł </span>
 						<span class="glyphicon glyphicon-thumbs-up"></span>
 
 						{{article.value}}
-					</span>
-					<a data-ng-href="{{article.comment_url}}" target="_blank">
+					</span> -->
+					<a data-ng-href="{{article.comment_url}}" target="_blank" data-easy-preview data-more="article.showComment">
 						<span class="glyphicon glyphicon-comment"></span>
 						<span class="comment-number">{{article.comment_number}}</span>
 					</a>
 				</div>
 
 
-				<div class="comment-preview-container">
-					<div data-ng-repeat="comment in article.comment_preview">
-						<span data-ng-bind-html="comment"></span>
-					</div>
-				</div>
+
 
 
 		<!-- 		<div class="comment-number-container">

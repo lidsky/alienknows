@@ -27,7 +27,6 @@ gif preview (show 1st frame):
 
 
 todo:
-comments-preview
 content-page (full preview and comments)
 
 '''
@@ -36,7 +35,6 @@ REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
 REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1)'
 USERNAME = 'plz_hire_me_reddit'
 PASSWORD = '****'
-
 
 
 
@@ -715,6 +713,8 @@ def get_submission_picture_preview(submission, soup, video_preview):
     # http://arstechnica.com/tech-policy/2014/10/its-now-legal-to-make-backups-of-movies-music-and-e-books-in-the-uk/
     # http://rbth.com/news/2014/10/01/russia_cancels_participation_in_us_education_program_after_russian_stude_40284.html
     # http://www.huffingtonpost.com/jen-caltrider/hello-america-its-me-colorado_b_5870476.html?utm_hp_ref=denver&amp;ir=Denver
+    # http://www.npr.org/2014/10/04/353679002/putin-among-the-surprises-on-nobel-peace-prize-list
+    # http://www.forbes.com/sites/jasperhamill/2014/09/29/voice-hackers-will-soon-be-talking-their-way-into-your-technology/
 
     return preview
 
@@ -786,6 +786,7 @@ def soup_to_string(soup):
 
 
 def get_submission_comment_preview(submission):
+    #TODO: too compact, refactor code/comment
     raw_comments = [{'comment_html': comment.body_html, 'score': comment.score} 
                     for comment in submission.comments if hasattr(comment,'score') and comment.score > 0 ]
     sorted_raw_comments = sorted(raw_comments, key=lambda x:x['score'], reverse=True)[: min(len(raw_comments), 5)]
@@ -813,7 +814,7 @@ def main():
     # submissions = get_submissions(reddit, subreddit='spacex+teslamotors+elonmusk+news+worldnews+wikipedia+startup', sorting_type='new', limit=1000)
     # submissions = get_submissions(reddit, subreddit='news+worldnews+wikipedia', sorting_type='new', limit=1000)
     # submissions = get_submissions(reddit, subreddit='trendingsubreddits', sorting_type='hot', limit=100)
-    submissions = get_submissions(reddit, limit=300)
+    submissions = get_submissions(reddit, limit=5000)
     count = 0
     for submission in submissions:
         count += 1
