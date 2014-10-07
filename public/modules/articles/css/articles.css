@@ -132,4 +132,16 @@ img.large-picture {
     font-family: lato;
 }
 
+.comment-preview {
+    border: solid 1px;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+.comment-preview p {
+    margin-bottom: 0;
+}
+
+
 

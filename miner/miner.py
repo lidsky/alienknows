@@ -38,6 +38,7 @@ PASSWORD = '****'
 
 
 
+
 def database_connect():
     client = MongoClient('mongodb://localhost/alienknows-dev')
     db = client['alienknows-dev']
@@ -715,6 +716,7 @@ def get_submission_picture_preview(submission, soup, video_preview):
     # http://www.huffingtonpost.com/jen-caltrider/hello-america-its-me-colorado_b_5870476.html?utm_hp_ref=denver&amp;ir=Denver
     # http://www.npr.org/2014/10/04/353679002/putin-among-the-surprises-on-nobel-peace-prize-list
     # http://www.forbes.com/sites/jasperhamill/2014/09/29/voice-hackers-will-soon-be-talking-their-way-into-your-technology/
+    # http://www.tampabay.com/news/politics/stateroundup/gov-scott-takes-fight-over-his-gmail-to-california/2200985
 
     return preview
 
