@@ -57,9 +57,9 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 			if (video) {
 				if (video.substring(video.length - 4) === '.mp4') {
 					console.log('in mp4 for url vid', video);
-					return '<video controls autoplay><source data-ng-src="{{article.video_preview}}" type="video/mp4"></video>';
+					return '<div class="preview-video"><video controls autoplay><source data-ng-src="{{article.video_preview}}" type="video/mp4"></video></div>';
 				} else {
-					return '<object data-ng-attr-data="{{article.video_preview}}"></object>';
+					return '<div class="preview-video"><object data-ng-attr-data="{{article.video_preview}}"></object></div>';
 				}
 			} else {
 				return '';
@@ -68,7 +68,7 @@ angular.module('articles').directive('hoverMedia', [ '$compile',
 
 
 		return {
-			// template: '<div></div>',
+			template: '<div></div>',
 			restrict: 'E',
 			scope: {
 				article: '='

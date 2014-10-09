@@ -106,7 +106,8 @@ img.large-picture {
 }
 
 .preview-video object {
-    width: 433px;
+    /*width: 433px;*/
+    width: 100%;
     height: 350px;
 }
 
