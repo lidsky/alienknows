@@ -27,7 +27,8 @@ gif preview (show 1st frame):
 
 
 todo:
-content-page (full preview and comments)
+- if wikipedia, use 1st paragraph as description, the rest as summary
+- content-page (full preview and comments)
 
 '''
 
@@ -35,6 +36,7 @@ REQUEST_HEADER = { 'User-Agent': 'alienknows.com summarizer' }
 REDDIT_USER_AGENT = 'plz_hire_me_reddit bot (reddit internship application, email:hmr1)'
 USERNAME = 'plz_hire_me_reddit'
 PASSWORD = '****'
+
 
 
 
