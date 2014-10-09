@@ -62,11 +62,17 @@ div.preview-block:hover {
 }
 
 
+.preview-title {
+    text-decoration: none;
+
+}
+
 span.preview-title {
     color: rgb(185, 185, 185) !important;
     letter-spacing: 1px;
     font-size: 23px;
     font-weight: 100;
+    letter-spacing: 2px;
 }
 
 .preview-title:hover {
@@ -115,15 +121,28 @@ img.large-picture {
 .preview-text {
     padding-top: 10px;
     padding-bottom: 10px;
-    font-family: lato;
-    font-weight: bolder;
+    /*font-family: lato;*/
+    /*font-weight: bolder;*/
+    font-weight: 200;
+    word-spacing: 1px;
+    letter-spacing: 1px;
     color: rgb(180, 180, 180);
 }
 
+.preview-description-container {
+    text-align: center;
+}
+
+
+.preview-description {
+    color: rgb(180, 180, 180);
+}
 
 .comment-number-container {
-    margin: 0 auto;
-    width: 95%;    
+/*    margin: 0 auto;
+    width: 95%;*/
+    margin-top: 15px;
+    text-align: center;
 }
 
 .comment-number-container a {
@@ -156,5 +175,8 @@ img.large-picture {
     margin-bottom: 0;
 }
 
+.hover-for-summary {
+    text-align: center;
+}
 
 

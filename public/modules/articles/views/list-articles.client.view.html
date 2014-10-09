@@ -74,11 +74,15 @@
 				</div> -->
 
 
-				<div class="preview-text"
+				<div class="preview-text preview-description-container"
 					 data-ng-show="(!article.summary_preview && !article.self_post_preview) || !article.showSummary"
 					 data-easy-preview
 					 data-more="article.showSummary">
-					 <span data-ng-bind="article.description_preview" ></span>
+					 <span data-ng-bind="article.description_preview" class="preview-description"></span>
+					 <div data-ng-show="(!!article.summary_preview || !!article.self_post_preview) && !article.showSummary"
+					 	  class="hover-for-summary">
+					 	Hover for more
+					 </div>
 				</div>
 
 
