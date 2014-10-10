@@ -3,7 +3,6 @@ h1, h2, h3, h4 {
     font-weight: 100;
 }
 
-
 a {
     color: rgb(200, 200, 200);
     text-decoration: underline;
@@ -12,6 +11,13 @@ a {
 a:hover {
     transition: all 0.5s ease;
     color: rgb(220, 220, 220);
+}
+
+blockquote {
+    font-size: 15px;
+    border-left: 3px solid #eee;
+    padding: 5px 10px;
+    margin: 0 0 10px;
 }
 
 .page-header {
@@ -118,6 +124,7 @@ img.large-picture {
 
 
 .preview-text {
+    /*text-align: center;*/
     padding-top: 10px;
     padding-bottom: 10px;
     /*font-family: lato;*/
@@ -137,6 +144,10 @@ img.large-picture {
     color: rgb(180, 180, 180);
 }
 
+.preview-summary {
+    text-align: center;
+}
+
 .comment-number-container {
     margin-top: 15px;
     text-align: center;
@@ -153,7 +164,7 @@ img.large-picture {
 
 .comment-number-container a:hover {
     color: white;
-    cursor: pointer !important;
+    cursor: pointer;
 }
 
 .comment-number-container span{
@@ -178,6 +189,8 @@ img.large-picture {
 }
 
 .hover-for-summary {
+    font-size: large;
+    font-weight: 600;
     text-align: center;
 }
 

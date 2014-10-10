@@ -35,7 +35,7 @@ angular.module('articles').directive('easyPreview', ['$timeout',
 						scope.$apply(function(){
 							scope.more = true;
 							element.css('color','rgb(180, 180, 180)');
-							element.css('cursor','default');
+							element.css('cursor','inherit');
 							imgElt.css({
 								color:'rgb(180, 180, 180)',
 								border:'none', 
@@ -48,7 +48,7 @@ angular.module('articles').directive('easyPreview', ['$timeout',
 
 					element.bind('mouseout', function(){
 						$timeout.cancel(timeoutId);
-						element.css('cursor','default');
+						element.css('cursor','inherit');
 					});
 					
 				});
