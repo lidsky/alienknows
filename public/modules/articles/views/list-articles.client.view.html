@@ -78,7 +78,7 @@
 					 data-ng-show="(!article.summary_preview && !article.self_post_preview) || !article.showSummary"
 					 data-easy-preview
 					 data-more="article.showSummary">
-					 <span data-ng-bind="article.description_preview" class="preview-description"></span>
+					 <span data-ng-bind-html="article.description_preview" class="preview-description"></span>
 					 <div data-ng-show="(!!article.summary_preview || !!article.self_post_preview) && !article.showSummary"
 					 	  class="hover-for-summary">
 					 	Hover for more
@@ -97,6 +97,7 @@
 
 
 				<div class="comment-preview-container preview-text" ng-show="article.showComment">
+					<div class="top-comment-sign preview-text">Top comments:</div>
 					<div data-ng-repeat="comment in article.comment_preview track by $index" class="comment-preview">
 						<span data-ng-bind-html="comment"></span>
 					</div>

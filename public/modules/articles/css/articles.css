@@ -69,7 +69,6 @@ div.preview-block:hover {
 
 span.preview-title {
     color: rgb(185, 185, 185) !important;
-    letter-spacing: 1px;
     font-size: 23px;
     font-weight: 100;
     letter-spacing: 2px;
@@ -139,9 +138,11 @@ img.large-picture {
 }
 
 .comment-number-container {
-/*    margin: 0 auto;
-    width: 95%;*/
     margin-top: 15px;
+    text-align: center;
+}
+
+.top-comment-sign {
     text-align: center;
 }
 
@@ -152,6 +153,7 @@ img.large-picture {
 
 .comment-number-container a:hover {
     color: white;
+    cursor: pointer !important;
 }
 
 .comment-number-container span{

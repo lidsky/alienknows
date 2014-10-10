@@ -40,7 +40,6 @@ PASSWORD = '****'
 
 
 
-
 def database_connect():
     client = MongoClient('mongodb://localhost/alienknows-dev')
     db = client['alienknows-dev']
@@ -149,6 +148,8 @@ def get_submission_content(submission):
         
         article['value'] = get_submission_value(submission)
         article['comment_number'] = get_submission_comment_number(submission)
+        article['comment_preview'] = get_submission_comment_preview(submission)
+
     else:
         print 'processing submission.id', submission.id
         response = ''
@@ -197,6 +198,11 @@ def get_submission_content(submission):
 
         print 'page summary_preview'
         submission_data['summary_preview'] = get_submission_summary_preview(submission, summary_target_test, title, response)
+
+        #swap if description is longer than summary
+        if submission_data['description_preview'] and submission_data['summary_preview']:
+            if len(submission_data['description_preview']) > len(submission_data['summary_preview']):
+                submission_data['summary_preview'], submission_data['description_preview'] = submission_data['description_preview'], submission_data['summary_preview']
 
         submission_data['comment_preview'] = get_submission_comment_preview(submission)
         submission_data['created_utc'] = submission.created_utc
@@ -341,7 +347,7 @@ def get_preview_wikipedia(wikipedia_url):
 
 def open_page(url, text=False):
     try:
-        response = requests.get(url, headers=REQUEST_HEADER)
+        response = requests.get(url, headers=REQUEST_HEADER, timeout=10)
     except Exception, e:
         print 'problem at open_page, url: ', url
         return ''
@@ -813,7 +819,7 @@ def main():
     try:
         reddit = init_praw()
     except:
-        print 'problem connecting to reddit, please check if the website is live. Please try again later'
+        print 'problem connecting to reddit, please check if the website is live or did you enter the correct authentication?'
         return
     # submissions = get_submissions(reddit, subreddit='videos+vids+video', sorting_type='top', limit=1000)
     # submissions = get_submissions(reddit, subreddit='spacex+teslamotors+elonmusk+news+worldnews+wikipedia+startup', sorting_type='new', limit=1000)
